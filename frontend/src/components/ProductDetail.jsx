@@ -1,0 +1,831 @@
+import { Fragment, useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { fetchSareeById, fetchSarees } from '../services/api';
+import { useWishlist } from '../context/WishlistContext';
+import { placeholders, getProductImage } from '../utils/imagePlaceholder';
+import { FaRupeeSign, FaSpinner, FaStar, FaRegStar, FaHeart, FaRegHeart } from 'react-icons/fa';
+import ScrollToTop from './ScrollToTop';
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
+const parseRupeeValueSafe = (value) => {
+  if (typeof value === 'number') return value;
+  if (!value) return 0;
+  const numeric = String(value).replace(/[^0-9.]/g, '');
+  const parsed = Number(numeric);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const resolveDisplayPrice = (product) => {
+  if (!product || typeof product !== 'object') return 0;
+  const candidates = [
+    product.price,
+    product.finalPrice,
+    product.sellingPrice,
+    product.mrp,
+    product.MRP,
+    product.originalPrice,
+    product?.sourceData?.mrp,
+    product?.sourceData?.MRP,
+  ];
+
+  for (const value of candidates) {
+    const parsed = parseRupeeValueSafe(value);
+    if (parsed > 0) return parsed;
+  }
+
+  return 0;
+};
+const hasDisplayablePrice = (product) => resolveDisplayPrice(product) > 0;
+
+// Simple LoginModal Component
+const LoginModal = ({ isOpen, onClose, backgroundLocation }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-lg p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-xl font-bold text-black mb-4">Login Required</h2>
+        <p className="text-black mb-6">Please login to continue.</p>
+        <div className="flex gap-3">
+          <Link
+            to="/signin"
+            state={backgroundLocation ? { backgroundLocation } : undefined}
+            className="flex-1 text-black font-semibold px-6 py-3 rounded-lg text-center border-2 border-black transition-all"
+            style={{ backgroundColor: '#E7EFD9' }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#DEE9CD'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#E7EFD9'}
+          >
+            Login
+          </Link>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-200 text-black font-semibold rounded-lg hover:bg-gray-300 transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Simple ProductCard Component
+const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
+  const productImages = product.images || (product.image ? [product.image] : []);
+  const imageUrl = Array.isArray(productImages) && productImages.length > 0 
+    ? (typeof productImages[0] === 'string' ? productImages[0] : productImages[0].url || placeholders.productList)
+    : getProductImage(product, 'image1');
+  const finalPrice = resolveDisplayPrice(product);
+  const ratingValue = (() => {
+    const r =
+      product?.rating ??
+      product?.averageRating ??
+      product?.ratingAvg ??
+      product?.ratingsAvg ??
+      product?.product_info?.rating;
+    const n = Number(r);
+    return Number.isFinite(n) && n > 0 ? n : 4.2;
+  })();
+
+  const brand =
+    product?.product_info?.brand ||
+    product?.brand ||
+    product?.product_info?.manufacturer ||
+    product?.manufacturer ||
+    product?.product_info?.brandName ||
+    'KIDZO';
+
+  const shortDescription = String(
+    product?.shortDescription ||
+      product?.description ||
+      product?.product_info?.shortDescription ||
+      product?.product_info?.description ||
+      ''
+  ).trim();
+
+  return (
+    <div
+      onClick={() => navigate(`/product/${product._id || product.id}`)}
+      className="group bg-white overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 transform"
+    >
+      <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden flex items-center justify-center">
+        <img
+          src={imageUrl}
+          alt={product.name || product.title || 'Product'}
+          className="w-full h-full object-contain transition-transform duration-300"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = placeholders.productList;
+          }}
+          loading="lazy"
+        />
+      </div>
+      <div className="relative p-4 bg-white">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8B2BE2] via-[#5c9404] to-[#8B2BE2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+        <p className="text-sm font-bold text-black line-clamp-2 mb-2 min-h-[2.5rem] group-hover:text-[#5c9404] transition-colors">
+          {product.name || product.title || 'Untitled Product'}
+        </p>
+
+        <p className="text-xs sm:text-sm text-gray-700/80 line-clamp-2 mb-2 min-h-[1.5rem] transition-colors">
+          {shortDescription || ' '}
+        </p>
+
+        <h3 className="text-xs font-semibold text-[#5c9404] uppercase tracking-wide line-clamp-1 mb-2">
+          {brand}
+        </h3>
+
+        {/* Rating */}
+        <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center">
+            {Array.from({ length: 5 }).map((_, idx) => {
+              const ratingRounded = Math.round(ratingValue);
+              return idx < ratingRounded ? (
+                <FaStar key={idx} className="w-3 h-3 text-amber-500" />
+              ) : (
+                <FaRegStar key={idx} className="w-3 h-3 text-amber-500" />
+              );
+            })}
+          </div>
+          <span className="text-xs font-medium text-gray-700">{ratingValue.toFixed(1)}</span>
+        </div>
+
+        {/* Price (only) */}
+        <div className="mt-3">
+          <span className="text-lg font-bold text-green-600">
+            ₹{Math.round(finalPrice).toLocaleString()}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductDetail = () => {
+  const { id, category } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist, isTogglingWishlist, wishlistError } = useWishlist();
+  const parseRupeeValue = (value) => {
+    if (typeof value === 'number') return value;
+    if (!value) return 0;
+    const numeric = String(value).replace(/[^0-9.]/g, '');
+    const parsed = Number(numeric);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  
+  const isAuthenticated = () => {
+    try {
+      return Boolean(localStorage.getItem('auth_token'));
+    } catch {
+      return false;
+    }
+  };
+  
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [trendingProducts, setTrendingProducts] = useState([]);
+  const [saleProducts, setSaleProducts] = useState([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const [loadingTrending, setLoadingTrending] = useState(false);
+  const [loadingSale, setLoadingSale] = useState(false);
+  const [shouldLoadTrending, setShouldLoadTrending] = useState(false);
+  const [shouldLoadSale, setShouldLoadSale] = useState(false);
+
+  // Scroll to top when product ID changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [id]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [id, category]);
+
+  // Lazy load trending and sale sections when scrolled into view
+  useEffect(() => {
+    if (!product) return;
+
+    const trendingObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !shouldLoadTrending) {
+          setShouldLoadTrending(true);
+          fetchTrendingProducts(product);
+        }
+      },
+      { rootMargin: '200px' } // Start loading 200px before visible
+    );
+
+    const saleObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !shouldLoadSale) {
+          setShouldLoadSale(true);
+          fetchSaleProducts(product);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+      const trendingElement = document.getElementById('trending-section');
+      const saleElement = document.getElementById('sale-section');
+
+      if (trendingElement) trendingObserver.observe(trendingElement);
+      if (saleElement) saleObserver.observe(saleElement);
+    }, 500);
+
+    return () => {
+      const trendingElement = document.getElementById('trending-section');
+      const saleElement = document.getElementById('sale-section');
+      if (trendingElement) trendingObserver.unobserve(trendingElement);
+      if (saleElement) saleObserver.unobserve(saleElement);
+    };
+  }, [product, shouldLoadTrending, shouldLoadSale]);
+
+  const fetchProduct = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchSareeById(id);
+      setProduct(data);
+      
+      // Set default size/color if available
+      if (data.product_info?.availableSizes?.length > 0) {
+        setSelectedSize(data.product_info.availableSizes[0]);
+      }
+      if (data.product_info?.color || data.color) {
+        setSelectedColor(data.product_info?.color || data.color);
+      }
+      
+      // Fetch recommended products immediately (same category, fast)
+      fetchRecommendedProducts(data);
+      
+      // Load trending and sale products lazily (only when scrolled into view)
+      // This makes initial page load faster
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      setProduct(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRecommendedProducts = async (currentProduct) => {
+    if (!currentProduct) return;
+    
+    setLoadingRecommendations(true);
+    try {
+      const currentProductId = currentProduct._id || currentProduct.id;
+      const productCategory = currentProduct.category || category || '';
+      
+      // Prefer same-category recommendations; if empty, fall back to all products.
+      const categoryProducts = productCategory ? await fetchSarees(productCategory) : [];
+      const allProducts = categoryProducts.length > 0 ? categoryProducts : await fetchSarees();
+      
+      // Filter out current product
+      let filtered = allProducts.filter(p => (p._id || p.id) !== currentProductId);
+      
+      // If product has a brand, prioritize same brand products
+      if (currentProduct.brand || currentProduct.product_info?.manufacturer) {
+        const brand = currentProduct.brand || currentProduct.product_info?.manufacturer;
+        const sameBrand = filtered.filter(p => 
+          (p.brand === brand) || (p.product_info?.manufacturer === brand)
+        );
+        const differentBrand = filtered.filter(p => 
+          (p.brand !== brand) && (p.product_info?.manufacturer !== brand)
+        );
+        filtered = [...sameBrand, ...differentBrand];
+      }
+
+      // Shuffle array to randomize
+      const shuffleArray = (array) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      };
+
+      const shuffled = shuffleArray(filtered);
+      const selectedProducts = shuffled.filter(hasDisplayablePrice).slice(0, 10);
+
+      // Normalize products
+      const normalized = selectedProducts.map(p => ({
+        ...p,
+        id: p._id || p.id,
+        images: p.images || (p.image ? [p.image] : []),
+        image: Array.isArray(p.images) && p.images.length > 0 
+          ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
+          : p.image || getProductImage(p, 'image1'),
+        price: resolveDisplayPrice(p),
+        originalPrice: p.originalPrice || p.mrp || p.price || 0,
+      }));
+
+      setRecommendedProducts(normalized.filter((p) => p.price > 0));
+    } catch (error) {
+      console.error('Error fetching recommended products:', error);
+      setRecommendedProducts([]);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
+
+  const fetchTrendingProducts = async (currentProduct) => {
+    if (!currentProduct) return;
+    
+    setLoadingTrending(true);
+    try {
+      const currentProductId = currentProduct._id || currentProduct.id;
+      
+      // Try to use backend trending API first (faster)
+      try {
+        const { getTrendingProducts } = await import('../services/api');
+        const trendingData = await getTrendingProducts(12, 7);
+        if (trendingData?.products && trendingData.products.length > 0) {
+          const filtered = trendingData.products
+            .filter(p => (p._id || p.id) !== currentProductId)
+            .filter(hasDisplayablePrice)
+            .slice(0, 12);
+          const normalized = filtered.map(p => ({
+            ...p,
+            id: p._id || p.id,
+            images: p.images || (p.image ? [p.image] : []),
+            image: Array.isArray(p.images) && p.images.length > 0 
+              ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
+              : p.image || getProductImage(p, 'image1'),
+            price: resolveDisplayPrice(p),
+            originalPrice: p.originalPrice || p.mrp || p.price || 0,
+          }));
+          setTrendingProducts(normalized.filter((p) => p.price > 0));
+          setLoadingTrending(false);
+          return;
+        }
+      } catch (apiError) {
+        // Trending endpoint unavailable; continue with fallback products.
+      }
+      
+      // Fallback: fetch all products so recommendations still render for FMCG.
+      const allProducts = (await fetchSarees())
+        .filter(p => (p._id || p.id) !== currentProductId)
+        .filter(hasDisplayablePrice);
+
+      // Simple random selection (faster than shuffle)
+      const randomProducts = [];
+      const maxProducts = Math.min(12, allProducts.length);
+      const usedIndices = new Set();
+      
+      while (randomProducts.length < maxProducts && usedIndices.size < allProducts.length) {
+        const randomIndex = Math.floor(Math.random() * allProducts.length);
+        if (!usedIndices.has(randomIndex)) {
+          usedIndices.add(randomIndex);
+          randomProducts.push(allProducts[randomIndex]);
+        }
+      }
+
+      // Normalize products
+      const normalized = randomProducts.map(p => ({
+        ...p,
+        id: p._id || p.id,
+        images: p.images || (p.image ? [p.image] : []),
+        image: Array.isArray(p.images) && p.images.length > 0 
+          ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
+          : p.image || getProductImage(p, 'image1'),
+        price: resolveDisplayPrice(p),
+        originalPrice: p.originalPrice || p.mrp || p.price || 0,
+      }));
+
+      setTrendingProducts(normalized.filter((p) => p.price > 0));
+    } catch (error) {
+      console.error('Error fetching trending products:', error);
+      setTrendingProducts([]);
+    } finally {
+      setLoadingTrending(false);
+    }
+  };
+
+  const fetchSaleProducts = async (currentProduct) => {
+    if (!currentProduct) return;
+    
+    setLoadingSale(true);
+    try {
+      const currentProductId = currentProduct._id || currentProduct.id;
+      
+      // Fetch all products so section renders even without legacy category names.
+      const allProducts = (await fetchSarees()).filter(hasDisplayablePrice);
+
+      // Filter products that are on sale (optimized)
+      const saleItems = [];
+      for (const p of allProducts) {
+        const productId = p._id || p.id;
+        if (productId === currentProductId) continue;
+
+        // No discount UI: treat only explicitly `onSale` products as sale items.
+        if (p.onSale === true) {
+          saleItems.push(p);
+          if (saleItems.length >= 12) break; // Stop early if we have enough
+        }
+      }
+
+      // If backend isn't flagging any items as `onSale`, don't block the section.
+      if (saleItems.length === 0) {
+        saleItems.push(...allProducts.filter(p => (p._id || p.id) !== currentProductId).slice(0, 12));
+      }
+
+      // Simple random selection (faster than shuffle)
+      const selectedSaleProducts = [];
+      const maxProducts = Math.min(12, saleItems.length);
+      const usedIndices = new Set();
+      
+      while (selectedSaleProducts.length < maxProducts && usedIndices.size < saleItems.length) {
+        const randomIndex = Math.floor(Math.random() * saleItems.length);
+        if (!usedIndices.has(randomIndex)) {
+          usedIndices.add(randomIndex);
+          selectedSaleProducts.push(saleItems[randomIndex]);
+        }
+      }
+
+      // Normalize products
+      const normalized = selectedSaleProducts.map(p => ({
+        ...p,
+        id: p._id || p.id,
+        images: p.images || (p.image ? [p.image] : []),
+        image: Array.isArray(p.images) && p.images.length > 0 
+          ? (typeof p.images[0] === 'string' ? p.images[0] : p.images[0].url)
+          : p.image || getProductImage(p, 'image1'),
+        price: resolveDisplayPrice(p),
+        originalPrice: p.originalPrice || p.mrp || p.price || 0,
+      }));
+
+      setSaleProducts(normalized.filter((p) => p.price > 0));
+    } catch (error) {
+      console.error('Error fetching sale products:', error);
+      setSaleProducts([]);
+    } finally {
+      setLoadingSale(false);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!isAuthenticated()) return setShowLoginModal(true);
+    try {
+      await addToCart(product._id || product.id, quantity, selectedSize, selectedColor);
+    } catch (error) {
+      if (error.message?.includes('login')) setShowLoginModal(true);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!isAuthenticated()) return setShowLoginModal(true);
+    try {
+      await addToCart(product._id || product.id, quantity, selectedSize, selectedColor);
+      navigate('/cart');
+    } catch (error) {
+      if (error.message?.includes('login')) setShowLoginModal(true);
+    }
+  };
+
+  const handlePrevImage = () => {
+    const productImages = product.images || (product.image ? [product.image] : []);
+    const images = Array.isArray(productImages) ? productImages : Object.values(productImages || {});
+    setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    const productImages = product.images || (product.image ? [product.image] : []);
+    const images = Array.isArray(productImages) ? productImages : Object.values(productImages || {});
+    setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  if (loading) return <LoadingState />;
+  if (!product) return <NotFoundState />;
+
+  const productImages = product.images || (product.image ? [product.image] : []);
+  const images = Array.isArray(productImages) ? productImages : Object.values(productImages || {});
+  const currentImage = images[selectedImageIndex] || images[0] || placeholders.productDetail;
+  const imageUrl = typeof currentImage === 'string' ? currentImage : (currentImage?.url || placeholders.productDetail);
+  
+  // Product pricing: robust fallback across different backend payload shapes.
+  const finalPrice = resolveDisplayPrice(product);
+  const productTitle = product.name || product.title || product.sourceData?.skuName || 'Product';
+  const productBrand = product.brand || product.product_info?.brand || product.product_info?.manufacturer || '';
+  const productDescription = product.description || product.productDetails?.description || '';
+  const productCategory = product.category || '';
+  const productSubCategory = product.subcategory || product['Sub-Category'] || '';
+  const productLeafCategory = product.subSubCategory || product['Sub-sub-Category'] || '';
+  const availableSizes = product.product_info?.availableSizes || [];
+  const productColor = product.product_info?.color || product.color || '';
+  const specRows = [
+    productBrand ? ['Brand', productBrand] : null,
+    product.product_info?.manufacturer ? ['Manufacturer', product.product_info.manufacturer] : null,
+    productCategory ? ['Category', productCategory] : null,
+    productSubCategory ? ['Sub Category', productSubCategory] : null,
+    productLeafCategory ? ['Product Type', productLeafCategory] : null,
+    product.product_info?.material ? ['Material', product.product_info.material] : null,
+    product.product_info?.shoeMaterial ? ['Material', product.product_info.shoeMaterial] : null,
+    availableSizes.length > 0 ? ['Available Sizes', availableSizes.join(', ')] : null,
+    productColor ? ['Color', productColor] : null,
+  ].filter(Boolean);
+  
+  // Keep a clean, readable title style across all products
+  const displayTitle = productTitle;
+
+  const productId = product._id || product.id;
+  const wishlisted = isInWishlist(productId);
+  const wishlistPending = isTogglingWishlist(productId);
+
+  const handleWishlistToggle = async () => {
+    if (!isAuthenticated()) return setShowLoginModal(true);
+    try {
+      await toggleWishlist(product);
+    } catch {
+      // Context stores a message in `wishlistError` (and reverts optimistic state on failure)
+    }
+  };
+
+  return (
+    <>
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} backgroundLocation={location} />
+      
+      <div className="min-h-screen bg-[#f1f3f6]">
+        <div className="max-w-[1320px] mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-6 pb-20 sm:pb-6">
+          {/* Back Button */}
+          <button 
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-black mb-4 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            back
+          </button>
+
+          <div className="bg-white border border-gray-200 rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.06)] p-3 sm:p-4 lg:p-5">
+            <div className="grid lg:grid-cols-[44%_56%] gap-3 sm:gap-4 lg:gap-6">
+            
+            {/* LEFT COLUMN: Flipkart-like gallery */}
+            <div className="p-1 sm:p-2 h-fit">
+              <div className="grid grid-cols-[56px_1fr] gap-3">
+                <div className="space-y-2 max-h-[420px] overflow-auto pr-1 scrollbar-hide">
+                  {images.map((img, idx) => {
+                    const thumbUrl = typeof img === 'string' ? img : (img?.url || placeholders.thumbnail);
+                    const isActive = idx === selectedImageIndex;
+                    return (
+                      <button
+                        key={`${thumbUrl}-${idx}`}
+                        type="button"
+                        onClick={() => setSelectedImageIndex(idx)}
+                        className={`w-12 h-12 border rounded-sm overflow-hidden bg-white ${
+                          isActive ? 'border-blue-500' : 'border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        <img
+                          src={thumbUrl}
+                          alt={`Thumbnail ${idx + 1}`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = placeholders.thumbnail;
+                          }}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="relative">
+                  <div className="aspect-square max-h-[360px] sm:max-h-[400px] lg:max-h-[420px] xl:max-h-[460px] w-full bg-white flex items-center justify-center border border-gray-100 rounded-sm overflow-hidden mx-auto">
+                    <img
+                      src={imageUrl}
+                      alt={productTitle}
+                      className="max-w-full max-h-full object-contain p-3 sm:p-4"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = placeholders.productDetail;
+                      }}
+                      loading="lazy"
+                    />
+                  </div>
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm"
+                        aria-label="Previous image"
+                      >
+                        <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm"
+                        aria-label="Next image"
+                      >
+                        <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 hidden sm:flex gap-2">
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 h-12 bg-[#ff9f00] text-white font-semibold rounded-sm hover:opacity-95"
+                >
+                  ADD TO CART
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  className="flex-1 h-12 bg-[#fb641b] text-white font-semibold rounded-sm hover:opacity-95"
+                >
+                  BUY NOW
+                </button>
+              </div>
+
+              {availableSizes.length > 0 && (
+                <div className="mt-4">
+                  <label className="block text-xs font-medium text-gray-700 mb-2">Select Size</label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableSizes.map((size) => {
+                      const isSelected = selectedSize === size;
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          className={`px-3 py-1.5 rounded-sm border transition-all text-sm ${
+                            isSelected
+                              ? 'border-blue-600 text-blue-700 bg-blue-50'
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {productColor && (
+                <div className="mt-4 text-sm text-gray-700">
+                  <span className="font-medium">Color:</span> {productColor}
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT COLUMN: Flipkart-like info */}
+            <div className="p-2 sm:p-3 space-y-5">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-medium text-[#212121] leading-snug">{displayTitle}</h1>
+                {productBrand && (
+                  <p className="text-sm text-[#878787] mt-1">by <span className="text-[#2874f0] font-medium">{productBrand}</span></p>
+                )}
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 bg-[#388e3c] text-white text-xs px-2 py-0.5 rounded">
+                    4.2 <FaStar className="w-3 h-3" />
+                  </span>
+                  <span className="text-xs text-[#878787]">2,184 ratings & 146 reviews</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-3xl font-semibold text-green-600">
+                  ₹{Math.round(finalPrice).toLocaleString()}
+                </span>
+              </div>
+
+              <div className="grid sm:grid-cols-[120px_1fr] gap-2 items-center">
+                <span className="text-sm text-[#878787]">Quantity</span>
+                <div className="inline-flex items-center border border-gray-300 rounded-sm w-fit">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="w-8 h-8 text-lg text-[#212121] hover:bg-gray-100"
+                  >
+                    -
+                  </button>
+                  <span className="w-10 text-center text-sm font-medium">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                    className="w-8 h-8 text-lg text-[#212121] hover:bg-gray-100"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-[120px_1fr] gap-2 items-center border-b border-[#f0f0f0] pb-4">
+                <span className="text-sm text-[#878787]">Delivery</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter pincode"
+                    className="h-9 px-3 border border-[#dfe1e5] rounded-sm text-sm outline-none focus:border-[#2874f0] w-full sm:w-48"
+                  />
+                  <button className="text-sm font-semibold text-[#2874f0]">Check</button>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-[#212121] mb-3">Product details</h3>
+                <div className="grid sm:grid-cols-[170px_1fr] gap-y-2 text-sm">
+                  {specRows.map(([label, value]) => (
+                    <Fragment key={label}>
+                      <div className="text-[#878787]">{label}</div>
+                      <div className="text-[#212121]">{value}</div>
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
+
+              {productDescription && (
+                <div>
+                  <h3 className="text-lg font-medium text-[#212121] mb-2">Description</h3>
+                  <p className="text-sm text-[#212121] leading-6 whitespace-pre-line">{productDescription}</p>
+                </div>
+              )}
+
+              <div className="bg-[#f5faff] border border-[#d6e8ff] rounded-sm p-3 text-sm">
+                <div className="font-medium text-[#212121]">Safe and secure payments. Easy returns.</div>
+                <div className="text-[#555] mt-1">Free shipping on eligible orders.</div>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div className="mt-12 sm:mt-16 pt-8 sm:pt-12 border-t border-gray-200 mb-12 sm:mb-20" />
+        </div>
+      </div>
+
+      {/* Mobile sticky purchase bar */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
+        <div className="p-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={handleAddToCart}
+              className="h-11 bg-[#ff9f00] text-white text-sm font-semibold rounded-sm"
+            >
+              ADD TO CART
+            </button>
+            <button
+              onClick={handleBuyNow}
+              className="h-11 bg-[#fb641b] text-white text-sm font-semibold rounded-sm"
+            >
+              BUY NOW
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      <ScrollToTop />
+    </>
+  );
+};
+
+const LoadingState = () => (
+  <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+      <p className="text-black font-medium">Loading details...</p>
+    </div>
+  </div>
+);
+
+const NotFoundState = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center bg-white">
+    <h1 className="text-2xl font-bold text-black mb-2">Product Not Found</h1>
+    <p className="text-black mb-6">The product you are looking for doesn't exist or has been removed.</p>
+    <Link 
+      to="/" 
+      className="text-black px-8 py-3 rounded-lg font-medium border-2 border-black transition-all"
+      style={{ backgroundColor: '#E7EFD9' }}
+      onMouseEnter={(e) => e.target.style.backgroundColor = '#DEE9CD'}
+      onMouseLeave={(e) => e.target.style.backgroundColor = '#E7EFD9'}
+    >
+      Back to Home
+    </Link>
+  </div>
+);
+
+export default ProductDetail;
