@@ -36,15 +36,30 @@ server.set('trust proxy', 1);
 
 // CORS configuration
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-server.use(
-  cors({
-    origin: [frontendUrl,"https://www.doormart.shop/",
-    "https://doormart.shop/", 'http://localhost:5173', 'http://localhost:5174'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  })
-);
+const allowedOrigins = new Set([
+  frontendUrl,
+  'https://www.doormart.shop',
+  'https://doormart.shop',
+  'http://localhost:5173',
+  'http://localhost:5174',
+]);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., health checks, server-to-server calls)
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+server.use(cors(corsOptions));
+server.options('*', cors(corsOptions));
 
 server.use(express.json({ limit: '10mb' })); // Increase limit to handle base64 images
 server.use(express.urlencoded({ extended: true, limit: '10mb' }));
