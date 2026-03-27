@@ -95,7 +95,7 @@ const ProductCard = ({ product }) => {
     product?.product_info?.manufacturer ||
     product?.manufacturer ||
     product?.product_info?.brandName ||
-    'KIDZO';
+    'DoorMart';
 
   const shortDescription = String(
     product?.shortDescription ||

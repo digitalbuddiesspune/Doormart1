@@ -5,6 +5,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { searchProducts } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import { navbarCategories } from '../data/categoryTree';
+import brandLogo from '../assets/Logo.png';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,8 +28,8 @@ const Navbar = () => {
   const [userAvatar, setUserAvatar] = useState('');
   const [avatarError, setAvatarError] = useState(false);
   const [headerLogo, setHeaderLogo] = useState({
-    url: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774521755/Untitled_1500_x_500_px_1_t89yk3.png',
-    alt: 'Kidzoo',
+    url: brandLogo,
+    alt: 'DoorMart',
     width: 'auto',
     height: 'auto',
   });
@@ -41,7 +42,7 @@ const Navbar = () => {
         if (logo) {
           setHeaderLogo({ 
             url: logo.url, 
-            alt: logo.alt || 'Kidzoo',
+            alt: logo.alt || 'DoorMart',
             width: logo.width || 'auto',
             height: logo.height || 'auto',
           });
@@ -342,10 +343,10 @@ const Navbar = () => {
                   objectFit: 'contain',
                 }}
                 className={headerLogo.width === 'auto' && headerLogo.height === 'auto' 
-                  ? "h-9 sm:h-10 md:h-12 lg:h-14 w-auto object-contain" 
+                  ? "h-20 sm:h-10 md:h-12 lg:h-24 w-auto object-contain" 
                   : "object-contain"}
                 onError={(e) => {
-                  e.target.src = 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774521755/Untitled_1500_x_500_px_1_t89yk3.png';
+                  e.target.src = brandLogo;
                 }}
               />
             </Link>

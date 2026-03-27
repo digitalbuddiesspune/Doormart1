@@ -45,7 +45,7 @@ export async function adminUpdateContactInfo(req, res) {
         email,
         phone,
         address,
-        companyName: companyName || 'Kidzo',
+        companyName: companyName || 'DoorMart',
       });
     }
 

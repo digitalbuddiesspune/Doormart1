@@ -20,7 +20,7 @@ const contactInfoSchema = new mongoose.Schema(
     },
     companyName: {
       type: String,
-      default: 'Kidzo',
+      default: 'DoorMart',
       trim: true,
     },
   },
@@ -32,10 +32,10 @@ contactInfoSchema.statics.getContactInfo = async function () {
   let contactInfo = await this.findOne();
   if (!contactInfo) {
     contactInfo = await this.create({
-      email: 'support@kidzo.com',
+      email: 'support@doormart.com',
       phone: '+91 98765 43210',
-      address: 'Kidzo Headquarters, 123 Playful Lane, Mumbai, India 400001',
-      companyName: 'Kidzo',
+      address: 'DoorMart Headquarters, 123 Playful Lane, Mumbai, India 400001',
+      companyName: 'DoorMart',
     });
   }
   return contactInfo;

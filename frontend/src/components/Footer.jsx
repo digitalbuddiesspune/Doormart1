@@ -2,18 +2,19 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Heart, Mail, Phone, MapPin, Facebook, Instagram, Truck, Shield, RotateCcw, HeadphonesIcon, MessageCircle } from 'lucide-react';
 import { api } from '../utils/api';
+import brandLogo from '../assets/Logo.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [contactInfo, setContactInfo] = useState({
-    email: 'support@kidzoo.com',
+    email: 'support@doormart.com',
     phone: '+91 98765 43210',
-    address: 'Kidzoo Headquarters, 123 Playful Lane, Mumbai, India 400001',
-    companyName: 'Kidzoo',
+    address: 'DoorMart Headquarters, 123 Playful Lane, Mumbai, India 400001',
+    companyName: 'DoorMart',
   });
   const [footerLogo, setFooterLogo] = useState({
-    url: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774521755/Untitled_1500_x_500_px_1_t89yk3.png',
-    alt: 'Kidzoo',
+    url: brandLogo,
+    alt: 'DoorMart',
     width: 'auto',
     height: 'auto',
   });
@@ -29,7 +30,7 @@ const Footer = () => {
       if (logo) {
         setFooterLogo({ 
           url: logo.url, 
-          alt: logo.alt || 'Kidzoo',
+          alt: logo.alt || 'DoorMart',
           width: logo.width || 'auto',
           height: logo.height || 'auto',
         });
@@ -91,12 +92,12 @@ const Footer = () => {
     {
       name: 'Instagram',
       icon: <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />,
-      url: 'https://instagram.com/kidzo',
+      url: 'https://instagram.com/doormart',
     },
     {
       name: 'Facebook',
       icon: <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />,
-      url: 'https://facebook.com/kidzo',
+      url: 'https://facebook.com/doormart',
     },
     {
       name: 'WhatsApp',
@@ -108,28 +109,28 @@ const Footer = () => {
   return (
     <>
       <style>{`
-        .footer-link {
-          color: #D1D5DB;
+      .footer-link {
+          color: #111827;
           transition: color 0.3s ease;
         }
         .footer-link:hover {
-          color: #F9FAFB;
+          color: #000000;
         }
       `}</style>
-      <footer className="w-full bg-gray-900" style={{ color: '#E5E7EB' }}>
+      <footer className="w-full bg-white text-black">
       {/* Trust Strip */}
-      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 bg-gray-800/70 border-b border-gray-700">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 bg-white border-b border-gray-200">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 md:gap-3 lg:gap-4">
           {trustFeatures.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 bg-gray-800 rounded-lg p-1.5 sm:p-2 border border-gray-700">
-                <div className="flex-shrink-0 w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-gray-700">
-                  <IconComponent className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-gray-100" />
+              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 bg-white rounded-lg p-1.5 sm:p-2 border border-gray-200">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-gray-100">
+                  <IconComponent className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-black" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h6 className="font-semibold text-[11px] sm:text-xs md:text-sm leading-tight text-gray-100">{feature.title}</h6>
-                  <p className="text-[9.5px] sm:text-[11px] md:text-xs text-gray-300 leading-tight mt-0.5">{feature.description}</p>
+                  <h6 className="font-semibold text-[11px] sm:text-xs md:text-sm leading-tight text-black">{feature.title}</h6>
+                  <p className="text-[9.5px] sm:text-[11px] md:text-xs text-gray-700 leading-tight mt-0.5">{feature.description}</p>
                 </div>
               </div>
             );
@@ -156,10 +157,10 @@ const Footer = () => {
                   ? "h-36 sm:h-44 w-auto object-contain mb-4" 
                   : "object-contain mb-4"}
                 onError={(e) => {
-                  e.target.src = 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774521755/Untitled_1500_x_500_px_1_t89yk3.png';
+                  e.target.src = brandLogo;
                 }}
               />
-              <p className="text-sm sm:text-base leading-relaxed max-w-md text-gray-300">
+              <p className="text-sm sm:text-base leading-relaxed max-w-md text-gray-700">
                 Your trusted destination for premium kids & baby products. 
                 We bring you the finest collection of clothing, accessories, and toys for your little ones.
               </p>
@@ -167,16 +168,16 @@ const Footer = () => {
 
             {/* Contact Info */}
             <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-300">
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-gray-100" />
+              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
                 <span className="text-sm sm:text-base break-words">{contactInfo.phone}</span>
               </div>
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-300">
-                <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-gray-100" />
+              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
+                <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
                 <span className="text-sm sm:text-base break-all">{contactInfo.email}</span>
               </div>
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-300">
-                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-gray-100" />
+              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
                 <span className="text-sm sm:text-base break-words">{contactInfo.address}</span>
               </div>
             </div>
@@ -184,7 +185,7 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h5 className="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-gray-100">Quick Links</h5>
+            <h5 className="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-black">Quick Links</h5>
             <ul className="space-y-2 sm:space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
@@ -192,7 +193,7 @@ const Footer = () => {
                     to={link.path}
                     className="footer-link opacity-90 hover:opacity-100 active:opacity-100 transition-all duration-300 flex items-center gap-2 group text-sm sm:text-base touch-manipulation"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0 bg-gray-300"></span>
+                    <span className="w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0 bg-black"></span>
                     {link.name}
                   </Link>
                 </li>
@@ -202,7 +203,7 @@ const Footer = () => {
 
           {/* Categories */}
           <div>
-            <h5 className="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-gray-100">Categories</h5>
+            <h5 className="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-black">Categories</h5>
             <ul className="space-y-2 sm:space-y-3">
               {categories.map((category, index) => (
                 <li key={index}>
@@ -210,7 +211,7 @@ const Footer = () => {
                     to={category.path}
                     className="footer-link opacity-90 hover:opacity-100 active:opacity-100 transition-all duration-300 flex items-center gap-2 group text-sm sm:text-base touch-manipulation"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0 bg-gray-300"></span>
+                    <span className="w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0 bg-black"></span>
                     {category.name}
                   </Link>
                 </li>
@@ -221,32 +222,32 @@ const Footer = () => {
       </div>
 
       {/* Policy Links Section */}
-      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 bg-gray-900">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 bg-white border-t border-gray-200">
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4">
           <Link 
             to="/privacy" 
-            className="text-sm sm:text-base text-gray-300 hover:text-gray-100 transition-colors duration-200"
+            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
           >
             Privacy Policy
           </Link>
-          <span className="text-gray-500">•</span>
+          <span className="text-gray-400">•</span>
           <Link 
             to="/terms" 
-            className="text-sm sm:text-base text-gray-300 hover:text-gray-100 transition-colors duration-200"
+            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
           >
             Terms & Conditions
           </Link>
-          <span className="text-gray-500">•</span>
+          <span className="text-gray-400">•</span>
           <Link 
             to="/shipping" 
-            className="text-sm sm:text-base text-gray-300 hover:text-gray-100 transition-colors duration-200"
+            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
           >
             Shipping Policy
           </Link>
-          <span className="text-gray-500">•</span>
+          <span className="text-gray-400">•</span>
           <Link 
             to="/refund-cancellation" 
-            className="text-sm sm:text-base text-gray-300 hover:text-gray-100 transition-colors duration-200"
+            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
           >
             Refund/Cancellation Policy
           </Link>
@@ -254,10 +255,10 @@ const Footer = () => {
       </div>
 
       {/* Bottom Footer Bar */}
-      <div className="border-t border-gray-700">
+      <div className="border-t border-gray-200">
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6 py-2 sm:py-3 md:py-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
-            <div className="text-xs sm:text-sm text-gray-300 text-center sm:text-left">
+            <div className="text-xs sm:text-sm text-black text-center sm:text-left">
               © {currentYear} {contactInfo.companyName}. All Rights Reserved
             </div>
             <div className="flex gap-3 sm:gap-4">
@@ -268,23 +269,23 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation"
-                  style={{ backgroundColor: '#374151', color: '#F3F4F6' }}
+                  style={{ backgroundColor: '#F3F4F6', color: '#000000' }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#4B5563';
-                    e.currentTarget.style.color = '#FFFFFF';
+                    e.currentTarget.style.backgroundColor = '#E5E7EB';
+                    e.currentTarget.style.color = '#000000';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#374151';
-                    e.currentTarget.style.color = '#F3F4F6';
+                    e.currentTarget.style.backgroundColor = '#F3F4F6';
+                    e.currentTarget.style.color = '#000000';
                   }}
                   onTouchStart={(e) => {
-                    e.currentTarget.style.backgroundColor = '#4B5563';
-                    e.currentTarget.style.color = '#FFFFFF';
+                    e.currentTarget.style.backgroundColor = '#E5E7EB';
+                    e.currentTarget.style.color = '#000000';
                   }}
                   onTouchEnd={(e) => {
                     setTimeout(() => {
-                      e.currentTarget.style.backgroundColor = '#374151';
-                      e.currentTarget.style.color = '#F3F4F6';
+                      e.currentTarget.style.backgroundColor = '#F3F4F6';
+                      e.currentTarget.style.color = '#000000';
                     }, 150);
                   }}
                   aria-label={social.name}

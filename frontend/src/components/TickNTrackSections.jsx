@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaTruck, FaAward, FaShieldAlt, FaUndo } from 'react-icons/fa';
 
-const KidzoSections = () => {
+const DoorMartSections = () => {
   const navigate = useNavigate();
 
   // Click Handler Function
@@ -620,4 +620,4 @@ const KidzoSections = () => {
   );
 };
 
-export default KidzoSections;
+export default DoorMartSections;
