@@ -59,7 +59,7 @@ const corsOptions = {
 };
 
 server.use(cors(corsOptions));
-server.options('*', cors(corsOptions));
+server.options(/.*/, cors(corsOptions));
 
 server.use(express.json({ limit: '10mb' })); // Increase limit to handle base64 images
 server.use(express.urlencoded({ extended: true, limit: '10mb' }));
