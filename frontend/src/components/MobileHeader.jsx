@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navbarCategories } from '../data/categoryTree';
+import { api } from '../utils/api';
 
 const MobileHeader = () => {
   const [activeCategory, setActiveCategory] = useState(null);
@@ -9,8 +10,25 @@ const MobileHeader = () => {
   const headerRef = useRef(null);
   const navigate = useNavigate();
 
-  // Categories with subcategories (same as Navbar)
-  const categories = navbarCategories;
+  const [navCategories, setNavCategories] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await api.getNavCategoriesWithProducts();
+        if (cancelled || !Array.isArray(data?.categories)) return;
+        setNavCategories(data.categories.length > 0 ? data.categories : null);
+      } catch {
+        if (!cancelled) setNavCategories(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const categories = navCategories ?? navbarCategories;
 
   // Calculate dropdown top position
   useEffect(() => {

@@ -1,5 +1,40 @@
 import { Category } from '../models/Category.js';
+import { Product } from '../models/product.js';
 import { categoryTaxonomy, flattenedTaxonomy } from '../data/categoryTaxonomy.js';
+import { navCategoryTree } from '../data/navCategoryTree.js';
+import { slugify, buildProductCategoryAndFilter } from '../utils/productCategoryFilter.js';
+
+/** Match ProductList URL segments → API query params */
+function mainCategoryQueryParamFromSlug(mainSlug) {
+  return mainSlug
+    .replace(/-/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function subCategoryQueryParamFromSlug(subSlug) {
+  const title = subSlug
+    .replace(/-/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return title.toLowerCase().replace(/\s+/g, '-');
+}
+
+async function countListedProductsForSubcategory(rawMain, rawCategorySlug) {
+  const base = buildProductCategoryAndFilter(rawMain, rawCategorySlug, '');
+  if (!base.$and?.length) return 0;
+  return Product.countDocuments({
+    $and: [...base.$and, { mrp: { $gt: 0 } }],
+  });
+}
+
+async function countListedProductsForMainOnly(rawMain) {
+  const base = buildProductCategoryAndFilter(rawMain, '', '');
+  if (!base.$and?.length) return 0;
+  return Product.countDocuments({
+    $and: [...base.$and, { mrp: { $gt: 0 } }],
+  });
+}
 
 // Get all categories with subcategories
 export const getAllCategories = async (req, res) => {
@@ -65,3 +100,44 @@ export const getAllCategories = async (req, res) => {
   }
 };
 
+/**
+ * Nav menu: only main categories and subcategories that have at least one product (mrp > 0).
+ * Shape matches frontend `navbarCategories`: { name, path, subcategories: [{ name, path }] }.
+ */
+export const getNavCategoriesWithProducts = async (req, res) => {
+  try {
+    const categories = [];
+
+    for (const main of navCategoryTree) {
+      const mainSlug = slugify(main.name);
+      const rawMain = mainCategoryQueryParamFromSlug(mainSlug);
+
+      const subResults = await Promise.all(
+        main.subcategories.map(async (sub) => {
+          const subSlug = slugify(sub.name);
+          const rawCategory = subCategoryQueryParamFromSlug(subSlug);
+          const count = await countListedProductsForSubcategory(rawMain, rawCategory);
+          if (count < 1) return null;
+          return {
+            name: sub.name,
+            path: `/category/${mainSlug}/${subSlug}`,
+          };
+        })
+      );
+
+      const subcategories = subResults.filter(Boolean);
+      const mainOnlyCount = await countListedProductsForMainOnly(rawMain);
+      if (subcategories.length === 0 && mainOnlyCount === 0) continue;
+
+      categories.push({
+        name: main.name,
+        path: `/category/${mainSlug}`,
+        subcategories,
+      });
+    }
+
+    return res.json({ categories });
+  } catch (err) {
+    return res.status(500).json({ message: 'Failed to build nav categories', error: err.message });
+  }
+};

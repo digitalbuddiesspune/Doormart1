@@ -1,17 +1,19 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Heart, Mail, Phone, MapPin, Facebook, Instagram, Truck, Shield, RotateCcw, HeadphonesIcon, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Instagram, Truck, Shield, RotateCcw, HeadphonesIcon, MessageCircle } from 'lucide-react';
 import { api } from '../utils/api';
 import brandLogo from '../assets/Logo.png';
 
+/** Static footer contact — not loaded from admin API */
+const CONTACT_INFO = {
+  email: 'support@doormart.com',
+  phone: '+91 98765 43210',
+  address: 'DoorMart Headquarters, 123 Playful Lane, Mumbai, India 400001',
+  companyName: 'DoorMart',
+};
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [contactInfo, setContactInfo] = useState({
-    email: 'support@doormart.com',
-    phone: '+91 98765 43210',
-    address: 'DoorMart Headquarters, 123 Playful Lane, Mumbai, India 400001',
-    companyName: 'DoorMart',
-  });
   const [footerLogo, setFooterLogo] = useState({
     url: brandLogo,
     alt: 'DoorMart',
@@ -20,7 +22,6 @@ const Footer = () => {
   });
 
   useEffect(() => {
-    loadContactInfo();
     loadLogo();
   }, []);
 
@@ -51,17 +52,6 @@ const Footer = () => {
     return () => window.removeEventListener('logo:updated', handleLogoUpdate);
   }, []);
 
-  const loadContactInfo = async () => {
-    try {
-      const data = await api.getContactInfo();
-      if (data) {
-        setContactInfo(data);
-      }
-    } catch (err) {
-      console.error('Failed to load contact info:', err);
-    }
-  };
-
   const quickLinks = [
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/products' },
@@ -86,7 +76,7 @@ const Footer = () => {
   ];
 
   // Extract phone number without +91 for WhatsApp link
-  const whatsappNumber = contactInfo.phone.replace(/[\s\+\-]/g, '').replace(/^91/, '');
+  const whatsappNumber = CONTACT_INFO.phone.replace(/[\s+\-]/g, '').replace(/^91/, '');
 
   const socialLinks = [
     {
@@ -146,7 +136,7 @@ const Footer = () => {
             <div className="mb-3 sm:mb-4">
               <img 
                 src={footerLogo.url}
-                alt={footerLogo.alt || contactInfo.companyName}
+                alt={footerLogo.alt || CONTACT_INFO.companyName}
                 style={{
                   ...(footerLogo.width !== 'auto' && { width: footerLogo.width }),
                   ...(footerLogo.height !== 'auto' && { height: footerLogo.height }),
@@ -170,15 +160,15 @@ const Footer = () => {
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
-                <span className="text-sm sm:text-base break-words">{contactInfo.phone}</span>
+                <span className="text-sm sm:text-base break-words">{CONTACT_INFO.phone}</span>
               </div>
               <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
-                <span className="text-sm sm:text-base break-all">{contactInfo.email}</span>
+                <span className="text-sm sm:text-base break-all">{CONTACT_INFO.email}</span>
               </div>
               <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
-                <span className="text-sm sm:text-base break-words">{contactInfo.address}</span>
+                <span className="text-sm sm:text-base break-words">{CONTACT_INFO.address}</span>
               </div>
             </div>
           </div>
@@ -259,7 +249,7 @@ const Footer = () => {
         <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6 py-2 sm:py-3 md:py-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
             <div className="text-xs sm:text-sm text-black text-center sm:text-left">
-              © {currentYear} {contactInfo.companyName}. All Rights Reserved
+              © {currentYear} {CONTACT_INFO.companyName}. All Rights Reserved
             </div>
             <div className="flex gap-3 sm:gap-4">
               {socialLinks.map((social, index) => (

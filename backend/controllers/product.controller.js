@@ -1,30 +1,9 @@
 import { Product } from '../models/product.js';
-
-const slugify = (value = '') =>
-  value
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-
-const buildLooseCategoryRegex = (value = '') => {
-  const normalized = value.toString().trim().toLowerCase();
-  if (!normalized) return null;
-  // Treat &, and, hyphen, and extra spaces as equivalent separators.
-  const pattern = normalized
-    .replace(/&/g, ' and ')
-    .replace(/-/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .split(' ')
-    .map((part) => (part === 'and' ? '(?:and|&)' : part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
-    .join('\\s*');
-  return new RegExp(`^${pattern}$`, 'i');
-};
+import {
+  buildProductCategoryAndFilter,
+  slugify,
+  buildLooseCategoryRegex,
+} from '../utils/productCategoryFilter.js';
 
 const parseRupeeToNumber = (value) => {
   if (typeof value === 'number') return value;
@@ -40,6 +19,7 @@ export const getProducts = async (req, res) => {
     const rawCategory = (req.query.category || '').toString();
     const rawSubCategory = (req.query.subcategory || req.query.subCategory || req.query.subSubCategory || '').toString();
 
+    const query = buildProductCategoryAndFilter(rawMain, rawCategory, rawSubCategory);
     const mainSlug = slugify(rawMain);
     const categorySlug = slugify(rawCategory);
     const subCategorySlug = slugify(rawSubCategory);
@@ -47,59 +27,6 @@ export const getProducts = async (req, res) => {
     const categoryLooseRe = buildLooseCategoryRegex(rawCategory || categorySlug.replace(/-/g, ' '));
     const subCategoryLooseRe = buildLooseCategoryRegex(rawSubCategory || subCategorySlug.replace(/-/g, ' '));
 
-    const andConditions = [];
-    if (mainSlug) {
-      andConditions.push({
-        $or: [
-          { 'taxonomy.mainCategorySlug': mainSlug },
-          { category: { $regex: new RegExp(`^${rawMain}$`, 'i') } },
-          { category: { $regex: new RegExp(mainSlug.replace(/-/g, ' '), 'i') } },
-          { Category: { $regex: new RegExp(`^${rawMain}$`, 'i') } },
-          { Category: { $regex: new RegExp(mainSlug.replace(/-/g, ' '), 'i') } },
-          ...(mainLooseRe ? [{ category: { $regex: mainLooseRe } }, { Category: { $regex: mainLooseRe } }] : []),
-        ],
-      });
-    }
-
-    if (categorySlug) {
-      andConditions.push({
-        $or: [
-          { 'taxonomy.subCategorySlug': categorySlug },
-          { subcategory: { $regex: new RegExp(`^${rawCategory}$`, 'i') } },
-          // Backward compatibility: older data may store 2nd-level category in `category`
-          { category: { $regex: new RegExp(`^${rawCategory}$`, 'i') } },
-          { 'Sub-Category': { $regex: new RegExp(`^${rawCategory}$`, 'i') } },
-          ...(categoryLooseRe
-            ? [
-                { subcategory: { $regex: categoryLooseRe } },
-                { category: { $regex: categoryLooseRe } },
-                { 'Sub-Category': { $regex: categoryLooseRe } },
-              ]
-            : []),
-        ],
-      });
-    }
-
-    if (subCategorySlug) {
-      andConditions.push({
-        $or: [
-          { 'taxonomy.subSubCategorySlug': subCategorySlug },
-          { subSubCategory: { $regex: new RegExp(`^${rawSubCategory}$`, 'i') } },
-          // Backward compatibility: older data may store leaf in `subcategory`
-          { subcategory: { $regex: new RegExp(`^${rawSubCategory}$`, 'i') } },
-          { 'Sub-sub-Category': { $regex: new RegExp(`^${rawSubCategory}$`, 'i') } },
-          ...(subCategoryLooseRe
-            ? [
-                { subSubCategory: { $regex: subCategoryLooseRe } },
-                { subcategory: { $regex: subCategoryLooseRe } },
-                { 'Sub-sub-Category': { $regex: subCategoryLooseRe } },
-              ]
-            : []),
-        ],
-      });
-    }
-
-    const query = andConditions.length > 0 ? { $and: andConditions } : {};
     // Use _id sort (indexed by default) to avoid in-memory sort limit errors.
     let products = await Product.find(query).sort({ _id: -1 });
 

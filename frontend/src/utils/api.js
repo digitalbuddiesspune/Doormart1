@@ -198,6 +198,8 @@ export const api = {
   getPolicy: (type) => request(`/api/policies/${type}`, { method: 'GET' }),
   getContactInfo: () => request('/api/contact-info', { method: 'GET' }),
   getCategories: () => request('/api/categories', { method: 'GET' }),
+  /** Navbar: mains + subcategories that have products (mrp > 0) */
+  getNavCategoriesWithProducts: () => request('/api/categories/nav-with-products', { method: 'GET' }),
   getLogo: async (type) => {
     if (isLogoEndpointUnavailable) return null;
     if (logoRequestCache.has(type)) return logoRequestCache.get(type);

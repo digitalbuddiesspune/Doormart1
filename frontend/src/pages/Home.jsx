@@ -28,7 +28,7 @@ const Home = () => {
             alt: 'Festive Season Offer - DoorMart',
           },
         ]}
-        mobileSrc="https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422686/White_and_Green_Grocery_Store_Instagram_Post_600_x_600_px_e93fw4.png"
+        mobileSrc="https://res.cloudinary.com/dzd47mpdo/image/upload/v1774420718/Red_and_Green_Modern_Beverage_Drink_Instagram_Post_1080_x_1080_px_gsv2vj.png"
       />
 
       {/* DoorMart Sections */}
