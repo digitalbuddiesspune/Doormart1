@@ -519,7 +519,6 @@ const ProductDetail = () => {
   const productDescription = product.description || product.productDetails?.description || '';
   const productCategory = product.category || '';
   const productSubCategory = product.subcategory || product['Sub-Category'] || '';
-  const productLeafCategory = product.subSubCategory || product['Sub-sub-Category'] || '';
   const availableSizes = product.product_info?.availableSizes || [];
   const productColor = product.product_info?.color || product.color || '';
   const specRows = [
@@ -527,7 +526,6 @@ const ProductDetail = () => {
     product.product_info?.manufacturer ? ['Manufacturer', product.product_info.manufacturer] : null,
     productCategory ? ['Category', productCategory] : null,
     productSubCategory ? ['Sub Category', productSubCategory] : null,
-    productLeafCategory ? ['Product Type', productLeafCategory] : null,
     product.product_info?.material ? ['Material', product.product_info.material] : null,
     product.product_info?.shoeMaterial ? ['Material', product.product_info.shoeMaterial] : null,
     availableSizes.length > 0 ? ['Available Sizes', availableSizes.join(', ')] : null,

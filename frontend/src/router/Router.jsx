@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import Layout from '../components/Layout';
@@ -84,6 +84,12 @@ const RedirectIfAuth = ({ children }) => {
   return children;
 };
 
+/** Old URLs had a third segment (leaf); taxonomy is now category + subcategory only. */
+const CategoryLeafRedirect = () => {
+  const { mainCategory, categoryName } = useParams();
+  return <Navigate to={`/category/${mainCategory}/${categoryName}`} replace />;
+};
+
 const Router = () => {
   const location = useLocation();
   const isAuthRoute = location.pathname === '/signin' || location.pathname === '/signup';
@@ -116,10 +122,9 @@ const Router = () => {
           <Route path="category/banarasi" element={<CategoryList />} />
           <Route path="silk/banarasi" element={<CategoryList />} />
 
-          {/* Dynamic category/subcategory routes - single UI (ProductList) */}
-          {/* Handle 3-segment paths: /category/shoes/mens-shoes/sports-shoes */}
-          <Route path="category/:mainCategory/:categoryName/:subCategoryName" element={<ProductList />} />
-          {/* Handle 2-segment paths: /category/shoes/mens-shoes */}
+          {/* Dynamic category routes: main only, or main + sub (no third / leaf segment) */}
+          <Route path="category/:mainCategory/:categoryName/:subCategoryName" element={<CategoryLeafRedirect />} />
+          {/* /category/:main/:sub */}
           <Route path="category/:categoryName/:subCategoryName" element={<ProductList />} />
           {/* Handle 1-segment paths: /category/shoes */}
           <Route path="category/:categoryName" element={<ProductList />} />

@@ -4,9 +4,7 @@ import { FaRupeeSign, FaSpinner, FaFilter, FaTimes, FaChevronDown, FaChevronUp, 
 import { fetchSarees } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import ScrollToTop from './ScrollToTop';
-import ProductTypeSelector from './ProductTypeSelector';
 import { useHeaderColor } from '../utils/useHeaderColor';
-import { categoryTree, slugifyCategory } from '../data/categoryTree';
 
 // Add CSS to hide scrollbar and loading animation
 const styles = `
@@ -93,7 +91,7 @@ const getProductShortDescription = (p) =>
   ).trim();
 
 const ProductList = ({ defaultCategory } = {}) => {
-  const { categoryName, subCategoryName, mainCategory } = useParams();
+  const { categoryName, subCategoryName } = useParams();
   const navigate = useNavigate();
   const headerColor = useHeaderColor();
   const navbarRef = useRef(null);
@@ -123,7 +121,24 @@ const ProductList = ({ defaultCategory } = {}) => {
   const [selectedWatchCaseMaterials, setSelectedWatchCaseMaterials] = useState([]);
   const [selectedWatchBandMaterials, setSelectedWatchBandMaterials] = useState([]);
   const [selectedWaterResistance, setSelectedWaterResistance] = useState([]);
-  
+
+  const priceExtent = React.useMemo(() => {
+    const prices = products.map(getProductPrice).filter((n) => n > 0);
+    if (!prices.length) return { min: 0, max: 0 };
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return { min: Math.floor(min), max: Math.ceil(max) };
+  }, [products]);
+
+  const [priceMin, setPriceMin] = useState(0);
+  const [priceMax, setPriceMax] = useState(0);
+
+  useEffect(() => {
+    if (priceExtent.max <= 0) return;
+    setPriceMin(priceExtent.min);
+    setPriceMax(priceExtent.max);
+  }, [priceExtent.min, priceExtent.max]);
+
   // Accordion states for desktop filters
   const [openSections, setOpenSections] = useState({
     price: true,
@@ -144,46 +159,16 @@ const ProductList = ({ defaultCategory } = {}) => {
     return t.replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
-  const categoryNavContext = React.useMemo(() => {
-    const currentMainSlug = slugifyCategory(mainCategory || categoryName || '');
-    const mainNode = categoryTree.find((main) => slugifyCategory(main.name) === currentMainSlug);
-    if (!mainNode) return { mainNode: null, activeSubNode: null, sidebarItems: [] };
-
-    const currentSubSlug = slugifyCategory(mainCategory ? categoryName : subCategoryName || '');
-    const activeSubNode = mainNode.subcategories.find((sub) => slugifyCategory(sub.name) === currentSubSlug) || null;
-    return {
-      mainNode,
-      activeSubNode,
-      sidebarItems: activeSubNode?.items || [],
-    };
-  }, [mainCategory, categoryName, subCategoryName]);
-
-  // Handle 3-segment paths: /category/shoes/mens-shoes/sports-shoes
-  // Calculate effectiveCategory and effectiveSubCategory
+  // /category/:main → main only; /category/:main/:sub → sub shown in heading, API uses both
   const effectiveCategory = React.useMemo(() => {
-    if (mainCategory && categoryName && subCategoryName) {
-      // 3-segment path: /category/shoes/mens-shoes/sports-shoes
-      return normalize(categoryName); // "Mens Shoes"
-    } else if (categoryName && subCategoryName) {
-      // 2-segment path: /category/shoes/mens-shoes
-      return normalize(categoryName); // "Shoes"
-    } else if (categoryName) {
-      // 1-segment path: /category/shoes
-      return normalize(categoryName); // "Shoes"
-    }
+    if (categoryName) return normalize(categoryName);
     return '';
-  }, [mainCategory, categoryName, subCategoryName]);
+  }, [categoryName]);
 
   const effectiveSubCategory = React.useMemo(() => {
-    if (mainCategory && categoryName && subCategoryName) {
-      // 3-segment path: /category/shoes/mens-shoes/sports-shoes
-      return normalize(subCategoryName); // "Sports Shoes"
-    } else if (categoryName && subCategoryName) {
-      // 2-segment path: /category/shoes/mens-shoes
-      return normalize(subCategoryName); // "Mens Shoes"
-    }
+    if (categoryName && subCategoryName) return normalize(subCategoryName);
     return '';
-  }, [mainCategory, categoryName, subCategoryName]);
+  }, [categoryName, subCategoryName]);
   
   // Detect product type from category
   const isShoesCategory = React.useMemo(() => {
@@ -410,40 +395,30 @@ const ProductList = ({ defaultCategory } = {}) => {
         setFilteredProducts([]);
         setDisplayCount(20); // Reset to initial 20 products when category changes
         
-        // Build request params based on URL depth:
-        // 1-level: /category/:main
-        // 2-level: /category/:main/:sub
-        // 3-level: /category/:main/:sub/:leaf
+        // 1-level: /category/:main — products under main category
+        // 2-level: /category/:main/:sub — products under subcategory slug (no leaf / sub-sub)
         let requestMainCategory = null;
         let requestCategory = null;
         let requestSubCategory = null;
 
-        if (mainCategory && categoryName && subCategoryName) {
-          // 3-level: main + sub + leaf
-          requestMainCategory = normalize(mainCategory);
-          requestCategory = normalize(categoryName).toLowerCase().replace(/\s+/g, '-');
-          requestSubCategory = normalize(subCategoryName);
-        } else if (categoryName && subCategoryName) {
-          // 2-level: main + sub (show ALL product types under this subcategory)
+        if (categoryName && subCategoryName) {
           requestMainCategory = normalize(categoryName);
           requestCategory = normalize(subCategoryName).toLowerCase().replace(/\s+/g, '-');
           requestSubCategory = null;
         } else if (categoryName) {
-          // 1-level: main only
           requestMainCategory = normalize(categoryName);
           requestCategory = null;
           requestSubCategory = null;
         }
-        
+
         console.log('ProductList - Fetching products:', {
           effectiveCategory,
           effectiveSubCategory,
           requestMainCategory,
           requestCategory,
           requestSubCategory,
-          mainCategory,
           categoryName,
-          subCategoryName
+          subCategoryName,
         });
         const data = await fetchSarees(requestCategory, requestSubCategory, requestMainCategory);
         console.log('ProductList - Received products:', data?.length || 0);
@@ -461,7 +436,7 @@ const ProductList = ({ defaultCategory } = {}) => {
     };
 
     load();
-  }, [effectiveCategory, effectiveSubCategory, mainCategory, categoryName, subCategoryName]);
+  }, [effectiveCategory, effectiveSubCategory, categoryName, subCategoryName]);
   
   // Apply filters
   useEffect(() => {
@@ -563,6 +538,13 @@ const ProductList = ({ defaultCategory } = {}) => {
       });
     }
 
+    if (priceExtent.max > 0 && priceExtent.min < priceExtent.max) {
+      result = result.filter((p) => {
+        const pr = getProductPrice(p);
+        return pr >= priceMin && pr <= priceMax;
+      });
+    }
+
     // Always hide products with invalid/zero price.
     result = result.filter(hasDisplayablePrice);
     
@@ -581,7 +563,11 @@ const ProductList = ({ defaultCategory } = {}) => {
     selectedWatchBandMaterials,
     selectedWaterResistance,
     isShoesCategory,
-    isWatchCategory
+    isWatchCategory,
+    priceExtent.min,
+    priceExtent.max,
+    priceMin,
+    priceMax,
   ]);
   
   const toggleFabric = (fabric) => {
@@ -602,7 +588,17 @@ const ProductList = ({ defaultCategory } = {}) => {
     setSelectedWatchCaseMaterials([]);
     setSelectedWatchBandMaterials([]);
     setSelectedWaterResistance([]);
+    if (priceExtent.max > 0) {
+      setPriceMin(priceExtent.min);
+      setPriceMax(priceExtent.max);
+    }
   };
+
+  const isPriceFiltered =
+    priceExtent.max > 0 &&
+    priceExtent.min < priceExtent.max &&
+    (Math.round(priceMin) > Math.round(priceExtent.min) ||
+      Math.round(priceMax) < Math.round(priceExtent.max));
 
   const toggleSection = (section) => {
     setOpenSections(prev => ({
@@ -618,7 +614,7 @@ const ProductList = ({ defaultCategory } = {}) => {
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
-  }, [categoryName, subCategoryName, mainCategory]);
+  }, [categoryName, subCategoryName]);
 
   // Infinite scroll with Intersection Observer
   useEffect(() => {
@@ -669,21 +665,76 @@ const ProductList = ({ defaultCategory } = {}) => {
     selectedWatchMovements.length,
     selectedWatchCaseMaterials.length,
     selectedWatchBandMaterials.length,
-    selectedWaterResistance.length
+    selectedWaterResistance.length,
+    isPriceFiltered ? 1 : 0,
   ].reduce((a, b) => a + b, 0);
 
-  const FilterContent = ({ showProductTypeSelector = true } = {}) => (
-    <div className="space-y-6">
-      {showProductTypeSelector && (
-        <ProductTypeSelector
-          activeSubNode={categoryNavContext.activeSubNode}
-          sidebarItems={categoryNavContext.sidebarItems}
-          mainNode={categoryNavContext.mainNode}
-          mainCategory={mainCategory}
-          subCategoryName={subCategoryName}
-        />
-      )}
+  const PriceFilterSection = ({ className = '', idSuffix = '' } = {}) => {
+    if (priceExtent.max <= 0) return null;
+    const samePrice = priceExtent.min >= priceExtent.max;
+    const minId = `price-min-range${idSuffix}`;
+    const maxId = `price-max-range${idSuffix}`;
+    return (
+      <div className={`border-b border-gray-200 pb-5 ${className}`}>
+        <div className="mb-3">
+          <p className="text-[11px] tracking-[0.14em] uppercase font-semibold text-gray-500 mb-1">Filter by</p>
+          <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            <FaRupeeSign className="w-3.5 h-3.5 text-gray-700" />
+            Price
+          </h4>
+          <p className="text-xs text-gray-600 mt-1">
+            {samePrice
+              ? `All items — ₹${priceExtent.min.toLocaleString('en-IN')}`
+              : `₹${Math.round(priceMin).toLocaleString('en-IN')} – ₹${Math.round(priceMax).toLocaleString('en-IN')}`}
+          </p>
+        </div>
+        {!samePrice && (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor={minId} className="text-xs font-medium text-gray-600 block mb-1.5">
+                Minimum
+              </label>
+              <input
+                id={minId}
+                type="range"
+                min={priceExtent.min}
+                max={priceExtent.max}
+                value={Math.min(priceMin, priceMax)}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  setPriceMin(v);
+                  if (v > priceMax) setPriceMax(v);
+                }}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+              />
+            </div>
+            <div>
+              <label htmlFor={maxId} className="text-xs font-medium text-gray-600 block mb-1.5">
+                Maximum
+              </label>
+              <input
+                id={maxId}
+                type="range"
+                min={priceExtent.min}
+                max={priceExtent.max}
+                value={Math.max(priceMin, priceMax)}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  setPriceMax(v);
+                  if (v < priceMin) setPriceMin(v);
+                }}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
+  const FilterContent = () => (
+    <div className="space-y-6">
+      <PriceFilterSection idSuffix="-mobile" />
       <div className="flex justify-end items-center pb-4 border-b border-gray-200">
         {activeFilterCount > 0 && (
           <button 
@@ -1221,33 +1272,35 @@ const ProductList = ({ defaultCategory } = {}) => {
           className="flex gap-6 lg:gap-8 relative filter-sticky-container lg:h-[calc(100vh-var(--app-header-height,80px)-2rem)]"
           style={{ position: 'relative', overflow: 'visible' }}
         >
-          {/* Desktop Left Panel (20%): Sticky Product Type selector */}
-          <aside className="hidden lg:block lg:w-1/5 lg:max-w-[20%] flex-shrink-0" style={{ alignSelf: 'flex-start', position: 'relative' }}>
-            <div 
-              ref={filterSidebarRef}
-              className="filter-sticky-sidebar"
-              style={{ 
-                position: 'sticky',
-                top: `${navbarHeight}px`,
-                zIndex: 40,
-                marginTop: 0,
-                overflow: 'visible'
-              }}
+          {priceExtent.max > 0 && (
+            <aside
+              className="hidden lg:block lg:w-1/5 lg:max-w-[20%] flex-shrink-0"
+              style={{ alignSelf: 'flex-start', position: 'relative' }}
             >
-              <div className="bg-white rounded-xl border border-gray-300 p-3">
-                <ProductTypeSelector
-                  activeSubNode={categoryNavContext.activeSubNode}
-                  sidebarItems={categoryNavContext.sidebarItems}
-                  mainNode={categoryNavContext.mainNode}
-                  mainCategory={mainCategory}
-                  subCategoryName={subCategoryName}
-                />
+              <div
+                ref={filterSidebarRef}
+                className="filter-sticky-sidebar"
+                style={{
+                  position: 'sticky',
+                  top: `${navbarHeight}px`,
+                  zIndex: 40,
+                  marginTop: 0,
+                  overflow: 'visible',
+                }}
+              >
+                <div className="bg-white rounded-xl border border-gray-300 p-3">
+                  <PriceFilterSection idSuffix="-desk" />
+                </div>
               </div>
-            </div>
-          </aside>
+            </aside>
+          )}
 
           {/* Main Content */}
-          <div className="flex-1 lg:w-4/5 lg:max-w-[80%] min-w-0 lg:h-full lg:overflow-y-auto custom-scrollbar lg:pr-1">
+          <div
+            className={`flex-1 min-w-0 lg:h-full lg:overflow-y-auto custom-scrollbar lg:pr-1 ${
+              priceExtent.max > 0 ? 'lg:w-4/5 lg:max-w-[80%]' : 'w-full'
+            }`}
+          >
             {/* Mobile Filter Button & Active Filters */}
             <div className="lg:hidden mb-3 space-y-2">
               <button 
@@ -1365,6 +1418,21 @@ const ProductList = ({ defaultCategory } = {}) => {
                       </button>
                     </span>
                   ))}
+                  {isPriceFiltered && (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white text-black border border-black">
+                      ₹{Math.round(priceMin).toLocaleString('en-IN')} – ₹{Math.round(priceMax).toLocaleString('en-IN')}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPriceMin(priceExtent.min);
+                          setPriceMax(priceExtent.max);
+                        }}
+                        className="ml-1.5 hover:scale-110 transition-transform"
+                      >
+                        <FaTimes className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  )}
                 </div>
               )}
             </div>
