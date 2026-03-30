@@ -31,7 +31,8 @@ const MobileHeader = () => {
   const categories = navCategories ?? navbarCategories;
   const getCategoryDisplayName = (name) => (name === 'FMCG' ? 'Our Products' : name);
   const mainMobileCategories = Array.isArray(categories)
-    ? categories.filter((c) => c?.name === 'FMCG')
+    // Hide the "Our Products" (FMCG) strip in mobile view
+    ? categories.filter((c) => c?.name !== 'FMCG')
     : [];
 
   // Calculate dropdown top position
@@ -78,6 +79,8 @@ const MobileHeader = () => {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
+
+  if (!mainMobileCategories.length) return null;
 
   return (
     <>
