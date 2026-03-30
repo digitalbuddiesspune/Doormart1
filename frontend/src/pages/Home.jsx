@@ -12,23 +12,16 @@ const Home = () => {
       <HeroSlider
         slides={[
           {
-            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422260/Red_and_Green_Modern_Beverage_Drink_Instagram_Post_1080_x_1080_px_1920_x_600_px_peybb9.png',
+            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774591555/banner-fmcg-2_sidqv8.jpg',
             alt: 'DoorMart - Premium Products Collection',
           },
           {
-            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422260/Red_and_Green_Modern_Beverage_Drink_Instagram_Post_1080_x_1080_px_1920_x_600_px_peybb9.png',
+            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422272/Untitled_1920_x_600_px_16_qkdbcw.png',
             alt: 'Festive Season Offer - DoorMart',
           },
-          {
-            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422686/Banner_Grocery_Delivery_Fresh_Organic_1920_x_600_px_hxivu9.png',
-            alt: 'Festive Season Offer - DoorMart',
-          },
-          {
-            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422896/Yellow_Fast_Food_Fest_Website_Banner_1920_x_600_px_bbseqi.png',
-            alt: 'Festive Season Offer - DoorMart',
-          },
+         
         ]}
-        mobileSrc="https://res.cloudinary.com/dzd47mpdo/image/upload/v1774420718/Red_and_Green_Modern_Beverage_Drink_Instagram_Post_1080_x_1080_px_gsv2vj.png"
+        mobileSrc="https://res.cloudinary.com/dzd47mpdo/image/upload/v1774853133/blue_fun_cute_baby_fashion_banner_lanscape_600_x_600_px_fz9am3.png"
       />
 
       {/* DoorMart Sections */}
