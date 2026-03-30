@@ -99,13 +99,13 @@ const Footer = () => {
       `}</style>
       <footer className="w-full bg-white text-black">
       {/* Trust Strip */}
-      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 md:py-3 bg-white border-b border-gray-200">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 md:gap-3 lg:gap-4">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-1 sm:py-1.5 md:py-2 bg-white border-b border-gray-200">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-1.5 md:gap-2 lg:gap-3">
           {trustFeatures.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 bg-white rounded-lg p-1.5 sm:p-2 border border-gray-200">
-                <div className="flex-shrink-0 w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-gray-100">
+              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-0.5 sm:gap-1 bg-white rounded-lg p-1 sm:p-1 border border-gray-200">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center bg-gray-100">
                   <IconComponent className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 text-black" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -119,11 +119,11 @@ const Footer = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6 py-4 sm:py-5 md:py-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6 py-2 sm:py-3 md:py-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
           {/* Brand Section */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <div className="mb-3 sm:mb-4">
+          <div>
+            <div className="mb-2 sm:mb-3">
               <img 
                 src={footerLogo.url}
                 alt={footerLogo.alt || CONTACT_INFO.companyName}
@@ -134,8 +134,8 @@ const Footer = () => {
                   objectFit: 'contain',
                 }}
                 className={footerLogo.width === 'auto' && footerLogo.height === 'auto' 
-                  ? "h-36 sm:h-44 w-auto object-contain mb-4" 
-                  : "object-contain mb-4"}
+                  ? "h-24 sm:h-28 w-auto object-contain mb-2" 
+                  : "object-contain mb-2"}
                 onError={(e) => {
                   e.target.src = brandLogo;
                 }}
@@ -148,25 +148,25 @@ const Footer = () => {
 
             {/* Contact Info */}
             <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
+              <div className="flex items-center gap-2 sm:gap-3 text-gray-700">
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
-                <span className="text-sm sm:text-base break-words">{CONTACT_INFO.phone}</span>
+                <span className="text-sm sm:text-base break-words leading-relaxed">{CONTACT_INFO.phone}</span>
               </div>
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
+              <div className="flex items-center gap-2 sm:gap-3 text-gray-700">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
-                <span className="text-sm sm:text-base break-all">{CONTACT_INFO.email}</span>
+                <span className="text-sm sm:text-base break-all leading-relaxed">{CONTACT_INFO.email}</span>
               </div>
-              <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-gray-700">
+              <div className="flex items-center gap-2 sm:gap-3 text-gray-700">
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 sm:mt-0 text-black" />
-                <span className="text-sm sm:text-base break-words">{CONTACT_INFO.address}</span>
+                <span className="text-sm sm:text-base break-words leading-relaxed">{CONTACT_INFO.address}</span>
               </div>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h5 className="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-black">Quick Links</h5>
-            <ul className="space-y-2 sm:space-y-3">
+          <div className="md:pt-20 lg:pt-40">
+            <h5 className="font-semibold mb-2 sm:mb-3 text-base sm:text-lg text-black">Quick Links</h5>
+            <ul className="space-y-1.5 sm:space-y-2">
               {quickLinks.map((link, index) => (
                 <li key={index}>
                   <Link 
@@ -181,47 +181,38 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Categories */}
-          {/* Categories removed */}
-        </div>
-      </div>
-
-      {/* Policy Links Section */}
-      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 bg-white border-t border-gray-200">
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4">
-          <Link 
-            to="/privacy" 
-            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
-          >
-            Privacy Policy
-          </Link>
-          <span className="text-gray-400">•</span>
-          <Link 
-            to="/terms" 
-            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
-          >
-            Terms & Conditions
-          </Link>
-          <span className="text-gray-400">•</span>
-          <Link 
-            to="/shipping" 
-            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
-          >
-            Shipping Policy
-          </Link>
-          <span className="text-gray-400">•</span>
-          <Link 
-            to="/refund-cancellation" 
-            className="text-sm sm:text-base text-black hover:text-gray-700 transition-colors duration-200"
-          >
-            Refund/Cancellation Policy
-          </Link>
+          {/* Policies */}
+          <div className="md:pt-20 lg:pt-40">
+            <h5 className="font-semibold mb-2 sm:mb-3 text-base sm:text-lg text-black">Policies</h5>
+            <ul className="space-y-1.5 sm:space-y-2">
+              <li>
+                <Link to="/privacy" className="footer-link opacity-90 hover:opacity-100 transition-colors duration-200 text-sm sm:text-base touch-manipulation">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="footer-link opacity-90 hover:opacity-100 transition-colors duration-200 text-sm sm:text-base touch-manipulation">
+                  Terms &amp; Conditions
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping" className="footer-link opacity-90 hover:opacity-100 transition-colors duration-200 text-sm sm:text-base touch-manipulation">
+                  Shipping Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund-cancellation" className="footer-link opacity-90 hover:opacity-100 transition-colors duration-200 text-sm sm:text-base touch-manipulation">
+                  Refund/Cancellation Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
       {/* Bottom Footer Bar */}
       <div className="border-t border-gray-200">
-        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6 py-2 sm:py-3 md:py-4">
+        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 xl:px-4 2xl:px-6 py-1 sm:py-1.5 md:py-2">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
             <div className="text-xs sm:text-sm text-black text-center sm:text-left">
               © {currentYear} {CONTACT_INFO.companyName}. All Rights Reserved
