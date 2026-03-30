@@ -28,8 +28,12 @@ const SignUp = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const backgroundLocation = location.state?.backgroundLocation;
-  const closePath = backgroundLocation?.pathname || '/';
+  const rawBackgroundLocation = location.state?.backgroundLocation;
+  const rawBackgroundPath = rawBackgroundLocation?.pathname;
+  const backgroundLocation = rawBackgroundPath && !['/signin', '/signup'].includes(rawBackgroundPath)
+    ? rawBackgroundLocation
+    : { pathname: '/' };
+  const closePath = backgroundLocation.pathname;
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -69,7 +73,7 @@ const SignUp = () => {
       const resp = await api.signup({ name, email: formData.email, password: formData.password });
       setSuccess('Account created successfully');
       // Do NOT auto-login after signup; redirect to Sign In
-      navigate('/signin', { replace: true, state: { backgroundLocation: backgroundLocation || location } });
+      navigate('/signin', { replace: true, state: { backgroundLocation } });
     } catch (err) {
       setError(err.message || 'Failed to sign up');
     } finally {
@@ -291,7 +295,7 @@ const SignUp = () => {
                   Already have an account?{' '}
                   <Link
                     to="/signin"
-                    state={{ backgroundLocation: backgroundLocation || location }}
+                    state={{ backgroundLocation }}
                     className="text-[#5c9404] hover:text-[#5c9404] font-semibold transition-colors"
                   >
                     Sign in here

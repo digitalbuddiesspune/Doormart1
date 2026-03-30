@@ -21,9 +21,15 @@ const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const otpInputRefs = React.useRef([]);
-  const backgroundPath = location.state?.backgroundLocation?.pathname || '/';
+  const rawBackgroundPath = location.state?.backgroundLocation?.pathname;
+  const backgroundPath = rawBackgroundPath && !['/signin', '/signup'].includes(rawBackgroundPath)
+    ? rawBackgroundPath
+    : '/';
   const fromPath = location.state?.from?.pathname;
-  const closePath = fromPath || backgroundPath;
+  const protectedPaths = ['/profile', '/cart', '/wishlist', '/checkout/address', '/order-success'];
+  const isProtectedFromPath = fromPath && protectedPaths.some((path) => fromPath.startsWith(path));
+  const closePath = isProtectedFromPath ? backgroundPath : (fromPath || backgroundPath);
+  const linkBackgroundLocation = location.state?.backgroundLocation || { pathname: backgroundPath };
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -652,7 +658,7 @@ const SignIn = () => {
                   Don't have an account?{' '}
                   <Link
                     to="/signup"
-                    state={{ backgroundLocation: location.state?.backgroundLocation || location }}
+                    state={{ backgroundLocation: linkBackgroundLocation }}
                     className="text-[#5c9404] hover:text-[#5c9404] font-semibold transition-colors"
                   >
                     Sign up here
