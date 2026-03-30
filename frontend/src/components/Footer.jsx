@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Facebook, Instagram, Truck, Shield, RotateCcw, HeadphonesIcon, MessageCircle } from 'lucide-react';
 import { api } from '../utils/api';
-import brandLogo from '../assets/Logo.png';
+
+const DEFAULT_LOGO_URL = 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774879393/1e7fc961-fb42-4460-8207-4d87f7b70a62.png';
 
 /** Static footer contact — not loaded from admin API */
 const CONTACT_INFO = {
@@ -15,7 +16,7 @@ const CONTACT_INFO = {
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [footerLogo, setFooterLogo] = useState({
-    url: brandLogo,
+    url: DEFAULT_LOGO_URL,
     alt: 'avfmcgdelivery',
     width: 'auto',
     height: 'auto',
@@ -134,10 +135,10 @@ const Footer = () => {
                   objectFit: 'contain',
                 }}
                 className={footerLogo.width === 'auto' && footerLogo.height === 'auto' 
-                  ? "h-24 sm:h-28 w-auto object-contain mb-2" 
+                  ? "h-8 sm:h-10 w-auto object-contain mb-2" 
                   : "object-contain mb-2"}
                 onError={(e) => {
-                  e.target.src = brandLogo;
+                  e.target.src = DEFAULT_LOGO_URL;
                 }}
               />
               <p className="text-sm sm:text-base leading-relaxed max-w-md text-gray-700">

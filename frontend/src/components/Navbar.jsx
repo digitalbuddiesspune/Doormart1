@@ -5,7 +5,8 @@ import { searchProducts } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import { navbarCategories } from '../data/categoryTree';
 import { api } from '../utils/api';
-import brandLogo from '../assets/Logo.png';
+
+const DEFAULT_LOGO_URL = 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774879393/1e7fc961-fb42-4460-8207-4d87f7b70a62.png';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,7 +28,7 @@ const Navbar = () => {
   const [userAvatar, setUserAvatar] = useState('');
   const [avatarError, setAvatarError] = useState(false);
   const [headerLogo, setHeaderLogo] = useState({
-    url: brandLogo,
+    url: DEFAULT_LOGO_URL,
     alt: 'avfmcgdelivery',
     width: 'auto',
     height: 'auto',
@@ -390,10 +391,10 @@ const Navbar = () => {
                   objectFit: 'contain',
                 }}
                 className={headerLogo.width === 'auto' && headerLogo.height === 'auto' 
-                  ? "h-20 sm:h-10 md:h-12 lg:h-24 w-auto object-contain" 
+                  ? "h-7 sm:h-8 md:h-10 lg:h-12 w-auto object-contain" 
                   : "object-contain"}
                 onError={(e) => {
-                  e.target.src = brandLogo;
+                  e.target.src = DEFAULT_LOGO_URL;
                 }}
               />
             </Link>
