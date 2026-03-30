@@ -68,8 +68,12 @@ export const getProducts = async (req, res) => {
       if (!productObj.title && productObj['SKU Name']) {
         productObj.title = productObj['SKU Name'];
       }
-      if ((!productObj.mrp || Number.isNaN(Number(productObj.mrp))) && productObj['MRP']) {
-        productObj.mrp = parseRupeeToNumber(productObj['MRP']);
+      if (!productObj.mrp || Number.isNaN(Number(productObj.mrp))) {
+        if (productObj['MRP']) {
+          productObj.mrp = parseRupeeToNumber(productObj['MRP']);
+        } else if (productObj['Price']) {
+          productObj.mrp = parseRupeeToNumber(productObj['Price']);
+        }
       }
       if (!productObj.description && productObj['About the Product']) {
         productObj.description = productObj['About the Product'];
@@ -88,6 +92,9 @@ export const getProducts = async (req, res) => {
       }
       if (!productObj.product_info.brand && productObj['Brand']) {
         productObj.product_info.brand = productObj['Brand'];
+      }
+      if (!productObj.brand && (productObj['Brand'] || productObj.product_info?.brand)) {
+        productObj.brand = productObj['Brand'] || productObj.product_info.brand;
       }
       if (!productObj.images) {
         productObj.images = {};
@@ -182,8 +189,12 @@ export const getProductById = async (req, res) => {
     if (!productObj.title && productObj['SKU Name']) {
       productObj.title = productObj['SKU Name'];
     }
-    if ((!productObj.mrp || Number.isNaN(Number(productObj.mrp))) && productObj['MRP']) {
-      productObj.mrp = parseRupeeToNumber(productObj['MRP']);
+    if (!productObj.mrp || Number.isNaN(Number(productObj.mrp))) {
+      if (productObj['MRP']) {
+        productObj.mrp = parseRupeeToNumber(productObj['MRP']);
+      } else if (productObj['Price']) {
+        productObj.mrp = parseRupeeToNumber(productObj['Price']);
+      }
     }
     if (!productObj.description && productObj['About the Product']) {
       productObj.description = productObj['About the Product'];

@@ -22,10 +22,7 @@ const getCategoryEndpoint = (category) => {
   
   // Map category names to endpoints
   const categoryMap = {
-    'beauty-hygiene': '/products',
-    'beverages': '/products',
-    'cleaning-household': '/products',
-    'snacks-branded-foods': '/products',
+    'fmcg': '/products',
   };
   
   // Check exact match first

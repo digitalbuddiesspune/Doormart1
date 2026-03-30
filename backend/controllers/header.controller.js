@@ -59,6 +59,11 @@ export const searchProducts = async (req, res) => {
       $or: [
         { title: searchRegex },
         { description: searchRegex },
+        { category: searchRegex },
+        { 'Category': searchRegex },
+        { 'SKU Name': searchRegex },
+        { 'About the Product': searchRegex },
+        { 'Brand': searchRegex },
         { 'product_info.brand': searchRegex },
         { 'product_info.manufacturer': searchRegex },
         { 'product_info.clothingType': searchRegex },
@@ -77,11 +82,56 @@ export const searchProducts = async (req, res) => {
 
     const limitedResults = await Product.find(searchQuery)
       .limit(20)
-      .select('title images price mrp discountPercent _id')
+      .select({
+        title: 1,
+        images: 1,
+        price: 1,
+        mrp: 1,
+        discountPercent: 1,
+        _id: 1,
+        description: 1,
+        product_info: 1,
+        category: 1,
+        'SKU Name': 1,
+        MRP: 1,
+        Price: 1,
+        'About the Product': 1,
+        Brand: 1,
+        'Image Link': 1,
+      })
       .lean();
 
-    console.log(`Search for "${query}": Found ${limitedResults.length} products`);
-    res.json({ results: limitedResults });
+    const normalizedResults = limitedResults.map((product) => {
+      const normalized = { ...product };
+      if (!normalized.title && normalized['SKU Name']) {
+        normalized.title = normalized['SKU Name'];
+      }
+      if ((!normalized.mrp || Number.isNaN(Number(normalized.mrp))) && normalized['MRP']) {
+        normalized.mrp = Number(String(normalized['MRP']).replace(/[^0-9.]/g, '')) || 0;
+      }
+      if ((!normalized.mrp || Number.isNaN(Number(normalized.mrp))) && normalized['Price']) {
+        normalized.mrp = Number(String(normalized['Price']).replace(/[^0-9.]/g, '')) || 0;
+      }
+      if (!normalized.description && normalized['About the Product']) {
+        normalized.description = normalized['About the Product'];
+      }
+      if (!normalized.product_info) {
+        normalized.product_info = {};
+      }
+      if (!normalized.product_info.brand && normalized['Brand']) {
+        normalized.product_info.brand = normalized['Brand'];
+      }
+      if (!normalized.images) {
+        normalized.images = {};
+      }
+      if (!normalized.images.image1 && normalized['Image Link']) {
+        normalized.images.image1 = normalized['Image Link'];
+      }
+      return normalized;
+    });
+
+    console.log(`Search for "${query}": Found ${normalizedResults.length} products`);
+    res.json({ results: normalizedResults });
   } catch (error) {
     console.error('Search error:', error);
     res.status(500).json({ message: 'Error performing search', error: error.message });
