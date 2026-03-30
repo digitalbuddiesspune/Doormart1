@@ -12,11 +12,11 @@ const Home = () => {
       <HeroSlider
         slides={[
           {
-            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774591555/banner-fmcg-2_sidqv8.jpg',
+            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774852336/blue_fun_cute_baby_fashion_banner_lanscape_1920_x_600_px_dkfb0a.png',
             alt: 'DoorMart - Premium Products Collection',
           },
           {
-            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422272/Untitled_1920_x_600_px_16_qkdbcw.png',
+            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774591555/banner-fmcg-2_sidqv8.jpg',
             alt: 'Festive Season Offer - DoorMart',
           },
          

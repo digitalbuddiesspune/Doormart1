@@ -61,13 +61,6 @@ const Footer = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
-  const categories = [
-    { name: 'Beauty & Hygiene', path: '/category/beauty-and-hygiene' },
-    { name: 'Beverages', path: '/category/beverages' },
-    { name: 'Cleaning & Household', path: '/category/cleaning-and-household' },
-    { name: 'Snacks & Branded Foods', path: '/category/snacks-and-branded-foods' },
-  ];
-
   const trustFeatures = [
     { icon: Truck, title: 'Free Shipping', description: 'On orders above ₹999' },
     { icon: Shield, title: 'Secure Payment', description: '100% secure transactions' },
@@ -192,22 +185,7 @@ const Footer = () => {
           </div>
 
           {/* Categories */}
-          <div>
-            <h5 className="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-black">Categories</h5>
-            <ul className="space-y-2 sm:space-y-3">
-              {categories.map((category, index) => (
-                <li key={index}>
-                  <Link 
-                    to={category.path}
-                    className="footer-link opacity-90 hover:opacity-100 active:opacity-100 transition-all duration-300 flex items-center gap-2 group text-sm sm:text-base touch-manipulation"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0 bg-black"></span>
-                    {category.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Categories removed */}
         </div>
       </div>
 
