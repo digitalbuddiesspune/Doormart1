@@ -38,8 +38,8 @@ server.set('trust proxy', 1);
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 const allowedOrigins = new Set([
   frontendUrl,
-  'https://www.doormart.shop',
-  'https://doormart.shop',
+  'https://www.avfmcgdelivery.in/',
+  'https://avfmcgdelivery.in/',
   'http://localhost:5173',
   'http://localhost:5174',
 ]);
