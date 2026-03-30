@@ -16,7 +16,7 @@ const Home = () => {
             alt: 'DoorMart - Premium Products Collection',
           },
           {
-            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422272/Untitled_1920_x_600_px_16_qkdbcw.png',
+            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774422260/Red_and_Green_Modern_Beverage_Drink_Instagram_Post_1080_x_1080_px_1920_x_600_px_peybb9.png',
             alt: 'Festive Season Offer - DoorMart',
           },
           {
