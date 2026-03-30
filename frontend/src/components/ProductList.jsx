@@ -1542,7 +1542,7 @@ const ProductList = ({ defaultCategory } = {}) => {
                         className="group bg-white overflow-hidden shadow-sm transition-all duration-500 cursor-pointer border border-gray-100 transform "
                         onClick={() => handleCardClick(p)}
                       >
-                    <div className="relative w-full aspect-[3/4] bg-gray-100 overflow-hidden flex items-center justify-center">
+                    <div className="relative w-full aspect-[3/4] bg-white overflow-hidden flex items-center justify-center">
                       <img
                         src={getProductImage(p, 'image1')}
                         alt={p.title}

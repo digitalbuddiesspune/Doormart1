@@ -421,7 +421,7 @@ const Search = () => {
                 className="group bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 hover:border-pink-100"
               >
                 <Link to={`/product/${p._id || p.id || ''}`} className="block">
-                  <div className="relative w-full aspect-[3/4] bg-gray-50">
+                  <div className="relative w-full aspect-[3/4] bg-white">
                     <img
                       src={getProductImage(p, 'image1') || p.image || placeholders.productList}
                       alt={p.title || p.name || 'Product'}
