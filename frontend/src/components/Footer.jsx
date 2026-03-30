@@ -66,7 +66,7 @@ const Footer = () => {
   ];
 
   // Extract phone number without +91 for WhatsApp link
-  const whatsappNumber = CONTACT_INFO.phone.replace(/[\s+\-]/g, '').replace(/^91/, '');
+  const whatsappNumber = CONTACT_INFO.phone.replace(/[\s+-]/g, '').replace(/^91/, '');
 
   const socialLinks = [
     {

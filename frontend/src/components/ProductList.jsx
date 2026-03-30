@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaRupeeSign, FaSpinner, FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaStar, FaRegStar } from 'react-icons/fa';
+import { FaRupeeSign,  FaFilter, FaTimes, FaChevronDown, FaChevronUp, FaStar, FaRegStar } from 'react-icons/fa';
 import { fetchSarees } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import ScrollToTop from './ScrollToTop';
@@ -60,7 +60,6 @@ const styles = `
   }
 `;
 
-const getProductMrp = (p) => Number(p?.originalPrice ?? p?.mrp ?? 0) || 0;
 const getProductPrice = (p) => {
   const parsedPrice = Number(p?.price ?? 0) || 0;
   if (parsedPrice > 0) return parsedPrice;
