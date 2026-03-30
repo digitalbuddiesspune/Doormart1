@@ -4,7 +4,7 @@ import ScrollToTop from "../components/ScrollToTop";
 const COMPANY = {
   name: "A V TEXTILEHUB PRIVATE LIMITED",
   address:
-    "Floor No.: P BLOCK\nBuilding No./Flat No.: PROPERTY  BEARING NO.P-4\nRoad/Street: VIJAY VIHAR\nLocality/Sub Locality: UTTAM NAGAR\nCity/Town/Village: New Delhi\nDistrict: South West Delhi\nState: Delhi\nPIN Code: 110059",
+    "P Block, Property Bearing No. P-4\nVijay Vihar, Uttam Nagar\nNew Delhi, South West Delhi\nDelhi - 110059",
   gstNo: "07ABBCA7672F1ZN",
 };
 

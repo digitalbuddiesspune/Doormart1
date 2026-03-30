@@ -314,6 +314,12 @@ const Navbar = () => {
   }, []);
 
   const categories = navCategories ?? navbarCategories;
+  const getCategoryDisplayName = (name) => (name === 'FMCG' ? 'Our Products' : name);
+  const mainNavbarCategories = Array.isArray(categories)
+    ? categories.filter((c) => c?.name === 'FMCG')
+    : [];
+  const fmcgCategory = mainNavbarCategories[0] || null;
+  const ourProductsPath = fmcgCategory?.path || '/category/fmcg';
   const hideCategoryChevron = new Set([
     'Beauty & Hygiene',
     'Beverages',
@@ -326,6 +332,14 @@ const Navbar = () => {
     'Cleaning & Household',
     'Snacks & Branded Foods',
   ]);
+
+  const isRouteActivePrefix = (prefixPath) => {
+    if (!prefixPath) return false;
+    return (
+      location.pathname === prefixPath ||
+      location.pathname.startsWith(`${prefixPath}/`)
+    );
+  };
 
   const CATEGORY_MENU_CLOSE_MS = 320;
 
@@ -387,116 +401,174 @@ const Navbar = () => {
 
             {/* Navigation Menu - Center (Desktop) with Categories */}
             <div className="hidden md:flex items-center justify-center flex-1 gap-1.5 lg:gap-2" ref={categoryRef}>
-              {categories.map((category) => (
-                <div
-                  key={category.name}
-                  className="relative group"
-                  onMouseEnter={() => {
-                    cancelCategoryMenuClose();
-                    if (
-                      hoverOpensDropdown.has(category.name) &&
-                      category.subcategories &&
-                      category.subcategories.length > 0
-                    ) {
-                      setActiveCategory(category.name);
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (!hoverOpensDropdown.has(category.name)) return;
-                    scheduleCategoryMenuClose(category.name);
-                  }}
-                >
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  `flex items-center font-medium text-[13px] lg:text-sm tracking-normal transition-all duration-200 whitespace-nowrap px-3 py-1.5 rounded-full touch-manipulation ${
+                    isActive
+                      ? 'bg-gray-900 text-white hover:bg-gray-900 hover:text-white'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-black active:bg-gray-100'
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300`
+                }
+              >
+                HOME
+              </NavLink>
+
+              {mainNavbarCategories.map((category) => {
+                const displayName = getCategoryDisplayName(category.name);
+                const isRouteActive = isRouteActivePrefix(category.path);
+                const isPillActive = activeCategory === category.name || isRouteActive;
+
+                return (
                   <div
-                    className={`flex items-center font-medium text-[13px] lg:text-sm tracking-normal transition-all duration-200 cursor-pointer whitespace-nowrap px-3 py-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 touch-manipulation text-gray-700 hover:text-black ${
-                      activeCategory === category.name ? 'bg-gray-900 text-white hover:bg-gray-900 hover:text-white' : ''
-                    }`}
-                    onClick={() => {
-                      // If category has subcategories, toggle dropdown; otherwise navigate directly
-                      if (category.subcategories && category.subcategories.length > 0) {
-                        setActiveCategory(activeCategory === category.name ? null : category.name);
-                      } else {
-                        navigate(category.path);
+                    key={category.name}
+                    className="relative group"
+                    onMouseEnter={() => {
+                      cancelCategoryMenuClose();
+                      if (
+                        hoverOpensDropdown.has(category.name) &&
+                        category.subcategories &&
+                        category.subcategories.length > 0
+                      ) {
+                        setActiveCategory(category.name);
                       }
                     }}
+                    onMouseLeave={() => {
+                      if (!hoverOpensDropdown.has(category.name)) return;
+                      scheduleCategoryMenuClose(category.name);
+                    }}
                   >
-                    <span className="whitespace-nowrap">{category.name}</span>
-                    {category.subcategories &&
-                      category.subcategories.length > 0 &&
-                      !hideCategoryChevron.has(category.name) && (
-                        <svg
-                          className={`w-4 h-4 ml-1.5 flex-shrink-0 transition-transform duration-300 ${
-                            activeCategory === category.name ? 'rotate-180' : ''
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      )}
-                  </div>
-
-                  {/* Simple Attractive Dropdown */}
-                  {activeCategory === category.name && category.subcategories && (
                     <div
-                      className="absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 sm:pt-2.5 px-6 -mx-6 animate-in fade-in slide-in-from-top-2 duration-300"
-                      onMouseEnter={cancelCategoryMenuClose}
+                      className={`flex items-center font-medium text-[13px] lg:text-sm tracking-normal transition-all duration-200 cursor-pointer whitespace-nowrap px-3 py-1.5 rounded-full hover:bg-gray-100 active:bg-gray-100 touch-manipulation ${
+                        isPillActive ? 'bg-gray-900 text-white hover:bg-gray-900 hover:text-white' : 'text-gray-700 hover:text-black'
+                      } focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300`}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          if (category.subcategories && category.subcategories.length > 0) {
+                            setActiveCategory(activeCategory === category.name ? null : category.name);
+                          } else {
+                            navigate(category.path);
+                          }
+                        }
+                      }}
+                      onClick={() => {
+                        // If category has subcategories, toggle dropdown; otherwise navigate directly
+                        if (category.subcategories && category.subcategories.length > 0) {
+                          setActiveCategory(activeCategory === category.name ? null : category.name);
+                        } else {
+                          navigate(category.path);
+                        }
+                      }}
                     >
-                      {/* top-full + padding (not margin) keeps pointer inside one hover target while moving from label to menu */}
-                      <div className="bg-white/95 backdrop-blur rounded-2xl shadow-[0_18px_45px_rgba(2,6,23,0.16)] ring-1 ring-gray-200/80 border border-gray-100 overflow-hidden w-60 sm:w-72 min-w-[220px] sm:min-w-[250px] mx-auto">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                          <button
-                            type="button"
-                            className="w-full text-left block px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold transition-colors duration-150 flex items-center gap-2 group touch-manipulation active:bg-gray-100 hover:bg-gray-100 text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setActiveCategory(null);
-                              navigate(category.path);
-                            }}
+                      <span className="whitespace-nowrap">{displayName}</span>
+                      {category.subcategories &&
+                        category.subcategories.length > 0 &&
+                        !hideCategoryChevron.has(category.name) && (
+                          <svg
+                            className={`w-4 h-4 ml-1.5 flex-shrink-0 transition-transform duration-300 ${
+                              activeCategory === category.name ? 'rotate-180' : ''
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                           >
-                            <span className="tracking-wide">All {category.name}</span>
-                            <svg className="w-4 h-4 ml-auto text-gray-500 group-hover:text-gray-800 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </button>
-                        </div>
-                        
-                        {/* Subcategories */}
-                        <div className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto custom-scrollbar py-1.5 sm:py-2">
-                          {category.subcategories.map((subcategory) => (
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        )}
+                    </div>
+
+                    {/* Simple Attractive Dropdown */}
+                    {activeCategory === category.name && category.subcategories && (
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 sm:pt-2.5 px-6 -mx-6 animate-in fade-in slide-in-from-top-2 duration-300"
+                        onMouseEnter={cancelCategoryMenuClose}
+                      >
+                        {/* top-full + padding (not margin) keeps pointer inside one hover target while moving from label to menu */}
+                        <div className="bg-white/95 backdrop-blur rounded-2xl shadow-[0_18px_45px_rgba(2,6,23,0.16)] ring-1 ring-gray-200/80 border border-gray-100 overflow-hidden w-60 sm:w-72 min-w-[220px] sm:min-w-[250px] mx-auto">
+                          {/* Header */}
+                          <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                             <button
-                              key={subcategory.name}
                               type="button"
-                              className="w-full text-left flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 sm:py-3 text-sm transition-all duration-150 hover:bg-gray-50 active:bg-gray-100 group touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300"
+                              className="w-full text-left block px-4 sm:px-5 py-3 text-xs sm:text-sm font-semibold transition-colors duration-150 flex items-center gap-2 group touch-manipulation active:bg-gray-100 hover:bg-gray-100 text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setActiveCategory(null);
-                                navigate(subcategory.path);
+                                navigate(category.path);
                               }}
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-700 transition-colors"></span>
-                              <span className="font-medium text-gray-900 flex-1">
-                                {subcategory.name}
-                              </span>
-                              <svg
-                                className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 text-gray-400 group-hover:text-gray-700 flex-shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
+                              <span className="tracking-wide">All {displayName}</span>
+                              <svg className="w-4 h-4 ml-auto text-gray-500 group-hover:text-gray-800 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
                             </button>
-                          ))}
+                          </div>
+                          
+                          {/* Subcategories */}
+                          <div className="max-h-[50vh] sm:max-h-[60vh] overflow-y-auto custom-scrollbar py-1.5 sm:py-2">
+                            {category.subcategories.map((subcategory) => (
+                              <button
+                                key={subcategory.name}
+                                type="button"
+                                className="w-full text-left flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 sm:py-3 text-sm transition-all duration-150 hover:bg-gray-50 active:bg-gray-100 group touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setActiveCategory(null);
+                                  navigate(subcategory.path);
+                                }}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-gray-700 transition-colors"></span>
+                                <span className="font-medium text-gray-900 flex-1">
+                                  {subcategory.name}
+                                </span>
+                                <svg
+                                  className="w-4 h-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 text-gray-400 group-hover:text-gray-700 flex-shrink-0"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
+
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  `flex items-center font-medium text-[13px] lg:text-sm tracking-normal transition-all duration-200 whitespace-nowrap px-3 py-1.5 rounded-full touch-manipulation ${
+                    isActive
+                      ? 'bg-gray-900 text-white hover:bg-gray-900 hover:text-white'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-black active:bg-gray-100'
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300`
+                }
+              >
+                ABOUT US
+              </NavLink>
+
+              <NavLink
+                to="/contact"
+                className={({ isActive }) =>
+                  `flex items-center font-medium text-[13px] lg:text-sm tracking-normal transition-all duration-200 whitespace-nowrap px-3 py-1.5 rounded-full touch-manipulation ${
+                    isActive
+                      ? 'bg-gray-900 text-white hover:bg-gray-900 hover:text-white'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-black active:bg-gray-100'
+                  } focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300`
+                }
+              >
+                CONTACT US
+              </NavLink>
             </div>
 
             {/* Icons - Right (Search, Cart on Mobile; All icons on Desktop) */}
@@ -675,6 +747,16 @@ const Navbar = () => {
                   HOME
                 </Link>
                 <Link
+                  to={ourProductsPath}
+                  className="bg-white border border-gray-300 rounded-lg py-4 sm:py-5 px-3 sm:px-4 text-center font-bold text-xs sm:text-sm uppercase text-black hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    window.scrollTo(0, 0);
+                  }}
+                >
+                  OUR PRODUCTS
+                </Link>
+                <Link
                   to="/about"
                   className="bg-white border border-gray-300 rounded-lg py-4 sm:py-5 px-3 sm:px-4 text-center font-bold text-xs sm:text-sm uppercase text-black hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
                   onClick={() => {
@@ -682,17 +764,17 @@ const Navbar = () => {
                     window.scrollTo(0, 0);
                   }}
                 >
-                  ABOUT
+                  ABOUT US
                 </Link>
                 <Link
                   to="/contact"
-                  className="bg-white border border-gray-300 rounded-lg py-4 sm:py-5 px-3 sm:px-4 text-center font-bold text-xs sm:text-sm uppercase text-black hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm col-span-2"
+                  className="bg-white border border-gray-300 rounded-lg py-4 sm:py-5 px-3 sm:px-4 text-center font-bold text-xs sm:text-sm uppercase text-black hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation shadow-sm"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     window.scrollTo(0, 0);
                   }}
                 >
-                  CONTACT
+                  CONTACT US
                 </Link>
               </div>
             </nav>

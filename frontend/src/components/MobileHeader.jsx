@@ -29,6 +29,10 @@ const MobileHeader = () => {
   }, []);
 
   const categories = navCategories ?? navbarCategories;
+  const getCategoryDisplayName = (name) => (name === 'FMCG' ? 'Our Products' : name);
+  const mainMobileCategories = Array.isArray(categories)
+    ? categories.filter((c) => c?.name === 'FMCG')
+    : [];
 
   // Calculate dropdown top position
   useEffect(() => {
@@ -81,7 +85,7 @@ const MobileHeader = () => {
         {/* Horizontal Scrollable Categories */}
         <div className="relative px-2 sm:px-3 pt-1.5 sm:pt-2 pb-1 sm:pb-1.5" ref={categoryRef} style={{ overflow: 'visible' }}>
           <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto hide-scrollbar" style={{ overflowY: 'visible', scrollBehavior: 'smooth' }}>
-            {categories.map((category) => (
+            {mainMobileCategories.map((category) => (
               <div key={category.name} className="relative group shrink-0" style={{ zIndex: activeCategory === category.name ? 100 : 'auto' }}>
                 <div
                   className={`flex items-center font-semibold text-[11px] sm:text-sm transition-all duration-200 cursor-pointer whitespace-nowrap px-1.5 sm:px-2 py-1.5 sm:py-2 rounded-lg hover:bg-gray-50 active:bg-gray-100 touch-manipulation ${
@@ -98,7 +102,7 @@ const MobileHeader = () => {
                     }
                   }}
                 >
-                  <span className="whitespace-nowrap">{category.name}</span>
+                  <span className="whitespace-nowrap">{getCategoryDisplayName(category.name)}</span>
                   {category.subcategories && category.subcategories.length > 0 && (
                     <svg
                       className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 flex-shrink-0 transition-transform duration-300 ${
@@ -120,7 +124,7 @@ const MobileHeader = () => {
       </div>
 
       {/* Dropdown Portal - Render outside scroll container */}
-      {categories.map((category) => (
+      {mainMobileCategories.map((category) => (
         activeCategory === category.name && category.subcategories && category.subcategories.length > 0 && (
           <div 
             key={`dropdown-${category.name}`}
@@ -148,7 +152,7 @@ const MobileHeader = () => {
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
                       >
-                        <span>All {category.name}</span>
+                        <span>All {getCategoryDisplayName(category.name)}</span>
                         <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-auto opacity-60 group-hover:opacity-100 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#000000' }}>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>

@@ -6,9 +6,9 @@ import brandLogo from '../assets/Logo.png';
 
 /** Static footer contact — not loaded from admin API */
 const CONTACT_INFO = {
-  email: 'support@doormart.com',
-  phone: '+91 98765 43210',
-  address: 'DoorMart Headquarters, 123 Playful Lane, Mumbai, India 400001',
+  email: 'Avtextileprivatelimited@gmail.com',
+  phone: '8920426017',
+  address: 'P Block, Property Bearing No. P-4, Vijay Vihar, Uttam Nagar, New Delhi, South West Delhi, Delhi - 110059',
   companyName: 'DoorMart',
 };
 
@@ -54,9 +54,6 @@ const Footer = () => {
 
   const quickLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Shop', path: '/products' },
-    { name: 'New Arrivals', path: '/new-arrivals' },
-    { name: 'Offers', path: '/offers' },
     { name: 'About Us', path: '/about' },
     { name: 'Contact', path: '/contact' },
   ];
