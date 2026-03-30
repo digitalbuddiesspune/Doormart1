@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaTruck, FaAward, FaShieldAlt, FaUndo } from 'react-icons/fa';
 
-const DoorMartSections = () => {
+const avfmcgdeliverySections = () => {
   const navigate = useNavigate();
 
   // Click Handler Function
@@ -617,4 +617,5 @@ const DoorMartSections = () => {
   );
 };
 
-export default DoorMartSections;
+export default avfmcgdeliverySections;
+

@@ -27,7 +27,7 @@ const AdminContactInfo = () => {
         email: data.email || '',
         phone: data.phone || '',
         address: data.address || '',
-        companyName: data.companyName || 'DoorMart',
+        companyName: data.companyName || 'avfmcgdelivery',
       });
       setError('');
     } catch (err) {
@@ -218,4 +218,5 @@ const AdminContactInfo = () => {
 };
 
 export default AdminContactInfo;
+
 

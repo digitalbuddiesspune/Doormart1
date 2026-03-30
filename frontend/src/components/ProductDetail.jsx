@@ -95,7 +95,7 @@ const ProductCard = ({ product }) => {
     product?.product_info?.manufacturer ||
     product?.manufacturer ||
     product?.product_info?.brandName ||
-    'DoorMart';
+    'avfmcgdelivery';
 
   const shortDescription = String(
     product?.shortDescription ||
@@ -827,3 +827,4 @@ const NotFoundState = () => (
 );
 
 export default ProductDetail;
+

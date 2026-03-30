@@ -9,14 +9,14 @@ const CONTACT_INFO = {
   email: 'Avtextileprivatelimited@gmail.com',
   phone: '8920426017',
   address: 'P Block, Property Bearing No. P-4, Vijay Vihar, Uttam Nagar, New Delhi, South West Delhi, Delhi - 110059',
-  companyName: 'DoorMart',
+  companyName: 'avfmcgdelivery',
 };
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [footerLogo, setFooterLogo] = useState({
     url: brandLogo,
-    alt: 'DoorMart',
+    alt: 'avfmcgdelivery',
     width: 'auto',
     height: 'auto',
   });
@@ -31,7 +31,7 @@ const Footer = () => {
       if (logo) {
         setFooterLogo({ 
           url: logo.url, 
-          alt: logo.alt || 'DoorMart',
+          alt: logo.alt || 'avfmcgdelivery',
           width: logo.width || 'auto',
           height: logo.height || 'auto',
         });
@@ -72,12 +72,12 @@ const Footer = () => {
     {
       name: 'Instagram',
       icon: <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />,
-      url: 'https://instagram.com/doormart',
+      url: 'https://instagram.com/avfmcgdelivery',
     },
     {
       name: 'Facebook',
       icon: <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />,
-      url: 'https://facebook.com/doormart',
+      url: 'https://facebook.com/avfmcgdelivery',
     },
     {
       name: 'WhatsApp',
@@ -259,3 +259,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

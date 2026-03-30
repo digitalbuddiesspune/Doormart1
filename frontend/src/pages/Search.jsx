@@ -38,7 +38,7 @@ const getProductBrand = (p) =>
   p?.product_info?.manufacturer ||
   p?.manufacturer ||
   p?.product_info?.brandName ||
-  'DoorMart';
+  'avfmcgdelivery';
 
 const getProductShortDescription = (p) =>
   String(
@@ -512,3 +512,4 @@ const Search = () => {
 };
 
 export default Search;
+

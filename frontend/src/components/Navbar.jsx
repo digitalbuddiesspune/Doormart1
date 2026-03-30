@@ -28,7 +28,7 @@ const Navbar = () => {
   const [avatarError, setAvatarError] = useState(false);
   const [headerLogo, setHeaderLogo] = useState({
     url: brandLogo,
-    alt: 'DoorMart',
+    alt: 'avfmcgdelivery',
     width: 'auto',
     height: 'auto',
   });
@@ -41,7 +41,7 @@ const Navbar = () => {
         if (logo) {
           setHeaderLogo({ 
             url: logo.url, 
-            alt: logo.alt || 'DoorMart',
+            alt: logo.alt || 'avfmcgdelivery',
             width: logo.width || 'auto',
             height: logo.height || 'auto',
           });

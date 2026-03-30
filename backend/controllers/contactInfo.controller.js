@@ -45,7 +45,7 @@ export async function adminUpdateContactInfo(req, res) {
         email,
         phone,
         address,
-        companyName: companyName || 'DoorMart',
+        companyName: companyName || 'avfmcgdelivery',
       });
     }
 
@@ -54,6 +54,7 @@ export async function adminUpdateContactInfo(req, res) {
     return res.status(500).json({ message: 'Failed to update contact info', error: err.message });
   }
 }
+
 
 
 

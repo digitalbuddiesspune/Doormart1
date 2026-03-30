@@ -20,7 +20,7 @@ const contactInfoSchema = new mongoose.Schema(
     },
     companyName: {
       type: String,
-      default: 'DoorMart',
+      default: 'avfmcgdelivery',
       trim: true,
     },
   },
@@ -32,10 +32,10 @@ contactInfoSchema.statics.getContactInfo = async function () {
   let contactInfo = await this.findOne();
   if (!contactInfo) {
     contactInfo = await this.create({
-      email: 'support@doormart.com',
+      email: 'support@avfmcgdelivery.com',
       phone: '+91 98765 43210',
-      address: 'DoorMart Headquarters, 123 Playful Lane, Mumbai, India 400001',
-      companyName: 'DoorMart',
+      address: 'avfmcgdelivery Headquarters, 123 Playful Lane, Mumbai, India 400001',
+      companyName: 'avfmcgdelivery',
     });
   }
   return contactInfo;
@@ -44,6 +44,7 @@ contactInfoSchema.statics.getContactInfo = async function () {
 const ContactInfo = mongoose.models.ContactInfo || mongoose.model('ContactInfo', contactInfoSchema);
 
 export default ContactInfo;
+
 
 
 

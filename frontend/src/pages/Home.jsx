@@ -1,7 +1,7 @@
 import React from 'react';
 import MobileBottomNav from '../components/MobileBottomNav';
 import HeroSlider from '../components/HeroSlider';
-import DoorMartSections from '../components/TickNTrackSections';
+import avfmcgdeliverySections from '../components/TickNTrackSections';
 import ScrollToTop from '../components/ScrollToTop';
 import HomeFeaturedProducts from '../components/HomeFeaturedProducts';
 
@@ -13,11 +13,11 @@ const Home = () => {
         slides={[
           {
             desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774855902/Minimalist_Beauty_Skincare_Switter_Header_1920_x_600_px_1_htqzom.png',
-            alt: 'DoorMart - Premium Products Collection',
+            alt: 'avfmcgdelivery - Premium Products Collection',
           },
           {
             desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774852336/blue_fun_cute_baby_fashion_banner_lanscape_1920_x_600_px_dkfb0a.png',
-            alt: 'Festive Season Offer - DoorMart',
+            alt: 'Festive Season Offer - avfmcgdelivery',
           },
          
         ]}
@@ -27,8 +27,8 @@ const Home = () => {
       {/* Featured Products */}
       <HomeFeaturedProducts />
 
-      {/* DoorMart Sections */}
-      <DoorMartSections />
+      {/* avfmcgdelivery Sections */}
+      <avfmcgdeliverySections />
 
       {/* Featured Collections */}
 
@@ -43,3 +43,4 @@ const Home = () => {
 };
 
 export default Home;
+

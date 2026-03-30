@@ -23,7 +23,7 @@ const getProductBrand = (p) =>
   p?.product_info?.manufacturer ||
   p?.manufacturer ||
   p?.product_info?.brandName ||
-  'DoorMart';
+  'avfmcgdelivery';
 
 const getProductTitle = (p) => p?.title || p?.name || p?.product_info?.title || 'Untitled Product';
 
@@ -222,4 +222,5 @@ const FeaturedProducts = () => {
 };
 
 export default FeaturedProducts;
+
 

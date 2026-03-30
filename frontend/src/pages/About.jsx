@@ -20,7 +20,7 @@ const About = () => {
         <div className="max-w-4xl mx-auto mb-16 sm:mb-20">
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 sm:p-10 text-center">
             <p className="text-lg text-gray-700 leading-relaxed mb-6">
-              At DoorMart, we bring you trusted FMCG products for home and family. From daily cleaning and household utility to snacks, beverages, and kids & baby essentials, our "Our Products" collection is curated for quality, consistency, and confidence.
+              At avfmcgdelivery, we bring you trusted FMCG products for home and family. From daily cleaning and household utility to snacks, beverages, and kids & baby essentials, our "Our Products" collection is curated for quality, consistency, and confidence.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed">
               We work to make everyday shopping simple: easy to browse, reliable in delivery, and supported by a customer-first approach. Whether you stock up for the week or discover something new, you can shop with peace of mind.
@@ -41,7 +41,7 @@ const About = () => {
         {/* What Makes Us Special */}
         <div className="mb-20">
           <h2 className="text-3xl font-medium tracking-wide mb-12 text-gray-900 text-center">
-            WHAT MAKES DOORMART DIFFERENT
+            WHAT MAKES avfmcgdelivery DIFFERENT
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             
@@ -105,10 +105,10 @@ const About = () => {
             Stock up on the essentials your home needs - curated categories with quality-first sourcing and reliable service.
           </p>
           <p className="text-base sm:text-lg text-white/90 leading-relaxed mb-6">
-            From cleaning & household utility to snacks and kids & baby products, DoorMart helps you keep everyday life running smoothly.
+            From cleaning & household utility to snacks and kids & baby products, avfmcgdelivery helps you keep everyday life running smoothly.
           </p>
           <p className="text-lg font-medium text-amber-200 italic">
-            Discover your essentials. Only at DoorMart.
+            Discover your essentials. Only at avfmcgdelivery.
           </p>
         </div>
 

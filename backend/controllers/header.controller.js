@@ -10,7 +10,7 @@ export const getHeaderData = async (req, res) => {
     const headerData = {
       logo: {
         url: '/logo.png',
-        alt: 'DoorMart Logo'
+        alt: 'avfmcgdelivery Logo'
       },
       navigation: {
         categories: categories,
@@ -137,3 +137,4 @@ export const searchProducts = async (req, res) => {
     res.status(500).json({ message: 'Error performing search', error: error.message });
   }
 };
+
