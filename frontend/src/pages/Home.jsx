@@ -19,6 +19,10 @@ const Home = () => {
             desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774591555/banner-fmcg-2_sidqv8.jpg',
             alt: 'Festive Season Offer - DoorMart',
           },
+          {
+            desktop: 'https://res.cloudinary.com/dzd47mpdo/image/upload/v1774855902/Minimalist_Beauty_Skincare_Switter_Header_1920_x_600_px_1_htqzom.png',
+            alt: 'Festive Season Offer - DoorMart',
+          },
          
         ]}
         mobileSrc="https://res.cloudinary.com/dzd47mpdo/image/upload/v1774853133/blue_fun_cute_baby_fashion_banner_lanscape_600_x_600_px_fz9am3.png"
