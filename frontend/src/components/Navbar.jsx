@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
 import { searchProducts } from '../services/api';
 import { placeholders, getProductImage } from '../utils/imagePlaceholder';
 import { navbarCategories } from '../data/categoryTree';

@@ -92,15 +92,13 @@ const FeaturedProducts = () => {
 
         const results = [];
         // Fetch sequentially so we don't overwhelm backend.
-        // eslint-disable-next-line no-restricted-syntax
         for (const cat of navCategories) {
-          // eslint-disable-next-line no-await-in-loop
           const prods = await loadForCategory(cat);
           if (prods.length > 0) results.push({ category: cat, products: prods });
         }
 
         if (!cancelled) setCategoryProducts(results);
-      } catch (e) {
+      } catch {
         if (!cancelled) setError('Failed to load featured products');
       } finally {
         if (!cancelled) setLoading(false);
@@ -153,7 +151,7 @@ const FeaturedProducts = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
               {Array.from({ length: 8 }).map((_, idx) => (
                 <div
-                  // eslint-disable-next-line react/no-array-index-key
+                 
                   key={idx}
                   className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm animate-pulse"
                 >
@@ -198,10 +196,10 @@ const FeaturedProducts = () => {
                   </div>
 
                   <div className="p-3 sm:p-4">
-                    <p className="text-sm font-bold text-black line-clamp-2 mb-2">
+                    <p className="text-sm font-bold text-black line-clamp-1 mb-2">
                       {getProductTitle(p)}
                     </p>
-                    <p className="text-xs text-gray-600 line-clamp-2 min-h-[1.25rem]">
+                    <p className="text-xs text-gray-600 line-clamp-1 min-h-[1.25rem]">
                       {getProductShortDescription(p) || '\u00A0'}
                     </p>
                     <div className="mt-3 flex items-end justify-between gap-2">

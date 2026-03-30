@@ -93,15 +93,15 @@ const getProductShortDescription = (p) =>
       ''
   ).trim();
 
-const ProductList = ({ defaultCategory } = {}) => {
+// eslint-disable-next-line no-empty-pattern
+const ProductList = ({ } = {}) => {
   const { categoryName, subCategoryName } = useParams();
   const navigate = useNavigate();
   const headerColor = useHeaderColor();
-  const navbarRef = useRef(null);
   const filterSidebarRef = useRef(null);
   const filterContainerRef = useRef(null);
   const [navbarHeight, setNavbarHeight] = useState(80);
-  const [isFilterSticky, setIsFilterSticky] = useState(false);
+  const [, setIsFilterSticky] = useState(false);
   
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
