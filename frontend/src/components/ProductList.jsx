@@ -61,8 +61,12 @@ const styles = `
 `;
 
 const getProductMrp = (p) => Number(p?.originalPrice ?? p?.mrp ?? 0) || 0;
-const getProductPrice = (p) =>
-  Number(p?.price ?? p?.mrp ?? p?.originalPrice ?? p?.finalPrice ?? 0) || 0;
+const getProductPrice = (p) => {
+  const parsedPrice = Number(p?.price ?? 0) || 0;
+  if (parsedPrice > 0) return parsedPrice;
+  const parsedMrp = Number(p?.mrp ?? p?.originalPrice ?? p?.finalPrice ?? 0) || 0;
+  return parsedMrp;
+};
 const hasDisplayablePrice = (p) => getProductPrice(p) > 0;
 
 const getProductRatingValue = (p) => {

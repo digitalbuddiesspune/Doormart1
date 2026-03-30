@@ -41,6 +41,13 @@ export function buildProductCategoryAndFilter(rawMain, rawCategory, rawSubCatego
   const mainSlug = slugify(rawM);
   const categorySlug = slugify(rawC);
   const subCategorySlug = slugify(rawS);
+
+  // FMCG is currently used as a single umbrella main category in this project.
+  // When only mainCategory=FMCG is requested, return all products.
+  if (mainSlug === 'fmcg' && !categorySlug && !subCategorySlug) {
+    return {};
+  }
+
   const mainLooseRe = buildLooseCategoryRegex(rawM || mainSlug.replace(/-/g, ' '));
   const categoryLooseRe = buildLooseCategoryRegex(rawC || categorySlug.replace(/-/g, ' '));
   const subCategoryLooseRe = buildLooseCategoryRegex(rawS || subCategorySlug.replace(/-/g, ' '));

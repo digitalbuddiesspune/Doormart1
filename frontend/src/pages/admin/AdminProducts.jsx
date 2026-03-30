@@ -263,22 +263,33 @@ const AdminProducts = () => {
     setSaving(true);
     setError('');
     try {
-      await api.admin.updateProduct(editForm._id, {
+      const payload = {
         title: editForm.title || editForm.skuName,
         'SKU Name': editForm.skuName || editForm.title,
-        'SKU Size': editForm.skuSize,
-        Brand: editForm.brand,
-        'Image Link': editForm.imageLink,
-        'About the Product': editForm.aboutProduct,
         Category: editForm.category || 'FMCG',
-        mrp: editForm.mrp,
-        Price: editForm.mrp,
-        discountPercent: editForm.discountPercent,
-        description: editForm.aboutProduct,
         category: editForm.category || 'FMCG',
-        product_info: { brand: editForm.brand || '' },
-        images: { image1: editForm.imageLink || '' },
-      });
+        mrp: Number(editForm.mrp),
+        Price: Number(editForm.mrp),
+        discountPercent: Number(editForm.discountPercent) || 0,
+      };
+
+      if (editForm.skuSize?.trim()) {
+        payload['SKU Size'] = editForm.skuSize.trim();
+      }
+      if (editForm.brand?.trim()) {
+        payload.Brand = editForm.brand.trim();
+        payload.product_info = { brand: editForm.brand.trim() };
+      }
+      if (editForm.aboutProduct?.trim()) {
+        payload['About the Product'] = editForm.aboutProduct.trim();
+        payload.description = editForm.aboutProduct.trim();
+      }
+      if (editForm.imageLink?.trim()) {
+        payload['Image Link'] = editForm.imageLink.trim();
+        payload.images = { image1: editForm.imageLink.trim() };
+      }
+
+      await api.admin.updateProduct(editForm._id, payload);
       setToast({ show: true, text: 'Product updated successfully!', type: 'success' });
       closeEditModal();
       await load();

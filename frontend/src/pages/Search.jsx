@@ -17,8 +17,12 @@ const styles = `
 `;
 
 const getProductMrp = (p) => Number(p?.mrp ?? p?.originalPrice ?? 0) || 0;
-const getProductPrice = (p) =>
-  Number(p?.price ?? p?.mrp ?? p?.originalPrice ?? p?.finalPrice ?? 0) || 0;
+const getProductPrice = (p) => {
+  const parsedPrice = Number(p?.price ?? 0) || 0;
+  if (parsedPrice > 0) return parsedPrice;
+  const parsedMrp = Number(p?.mrp ?? p?.originalPrice ?? p?.finalPrice ?? 0) || 0;
+  return parsedMrp;
+};
 const hasDisplayablePrice = (p) => getProductPrice(p) > 0;
 
 const getProductRatingValue = (p) => {
@@ -127,7 +131,7 @@ const Search = () => {
       const range = priceRanges.find(r => r.id === selectedPriceRange);
       if (range) {
         result = result.filter(p => {
-          const price = p.price || p.mrp || p.originalPrice || 0;
+          const price = getProductPrice(p);
           return price >= range.min && price <= range.max;
         });
       }
