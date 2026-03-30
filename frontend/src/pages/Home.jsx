@@ -1,9 +1,9 @@
 import React from 'react';
-import Collections from '../components/Collections';
 import MobileBottomNav from '../components/MobileBottomNav';
 import HeroSlider from '../components/HeroSlider';
 import DoorMartSections from '../components/TickNTrackSections';
 import ScrollToTop from '../components/ScrollToTop';
+import HomeFeaturedProducts from '../components/HomeFeaturedProducts';
 
 const Home = () => {
   return (
@@ -23,6 +23,9 @@ const Home = () => {
         ]}
         mobileSrc="https://res.cloudinary.com/dzd47mpdo/image/upload/v1774853133/blue_fun_cute_baby_fashion_banner_lanscape_600_x_600_px_fz9am3.png"
       />
+
+      {/* Featured Products */}
+      <HomeFeaturedProducts />
 
       {/* DoorMart Sections */}
       <DoorMartSections />
