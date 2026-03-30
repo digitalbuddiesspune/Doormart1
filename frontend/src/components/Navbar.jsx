@@ -314,7 +314,7 @@ const Navbar = () => {
   }, []);
 
   const categories = navCategories ?? navbarCategories;
-  const getCategoryDisplayName = (name) => (name === 'FMCG' ? 'Our Products' : name);
+  const getCategoryDisplayName = (name) => (name === 'FMCG' ? 'SHOP NOW' : name);
   const mainNavbarCategories = Array.isArray(categories)
     ? categories.filter((c) => c?.name === 'FMCG')
     : [];
@@ -377,7 +377,7 @@ const Navbar = () => {
     <nav className={`sticky top-0 z-[70] w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 transition-shadow duration-200 ${isScrolled ? 'shadow-md' : 'shadow-sm'}`}>
       {/* Bottom Bar - Clean white background with Logo, Navigation, and Icons */}
       <div className="w-full">
-        <div className="max-w-7xl mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className=" mx-auto w-full px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo/Brand - Left */}
             <Link to="/" className="flex-shrink-0">
