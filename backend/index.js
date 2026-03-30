@@ -36,18 +36,21 @@ server.set('trust proxy', 1);
 
 // CORS configuration
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-const allowedOrigins = new Set([
-  frontendUrl,
-  'https://www.avfmcgdelivery.in/',
-  'https://avfmcgdelivery.in/',
-  'http://localhost:5173',
-  'http://localhost:5174',
-]);
+const normalizeOrigin = (value = '') => value.replace(/\/+$/, '');
+const allowedOrigins = new Set(
+  [
+    frontendUrl,
+    'https://www.avfmcgdelivery.in',
+    'https://avfmcgdelivery.in',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ].map(normalizeOrigin)
+);
 
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g., health checks, server-to-server calls)
-    if (!origin || allowedOrigins.has(origin)) {
+    if (!origin || allowedOrigins.has(normalizeOrigin(origin))) {
       callback(null, true);
       return;
     }
