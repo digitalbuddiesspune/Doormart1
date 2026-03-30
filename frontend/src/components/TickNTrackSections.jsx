@@ -11,7 +11,7 @@ const DoorMartSections = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Shop by Category Section
+  // Category Section (removed from Home page)
   const MainCategories = () => {
     const categories = [
       { 
@@ -191,7 +191,7 @@ const DoorMartSections = () => {
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
               }}
             >
-              OFFER ZONE
+              &nbsp;
             </h2>
           </div>
           {/* Mobile: auto circular carousel */}
@@ -314,7 +314,7 @@ const DoorMartSections = () => {
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)' 
               }}
             >
-              <span className="inline-block">PREMIUM COLLECTION</span>
+              <span className="inline-block">&nbsp;</span>
             </h2>
           </div>
 
@@ -612,9 +612,6 @@ const DoorMartSections = () => {
 
   return (
     <div style={{ backgroundColor: '#FFFFFF' }}>
-      <MainCategories />
-      <FeaturedSection />
-      <PremiumCollection />
       <WhyChooseUs />
     </div>
   );
