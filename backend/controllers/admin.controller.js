@@ -218,7 +218,29 @@ export async function updateOrderStatus(req, res) {
 export async function adminListProducts(req, res) {
   try {
     const products = await Product.find({}).sort({ createdAt: -1 }).lean();
-    return res.json(products);
+    const normalized = products.map((p) => ({
+      ...p,
+      title: p.title || p['SKU Name'] || p.sourceData?.skuName || '',
+      category: p.category || p.Category || p.sourceData?.raw?.Category || '',
+      description: p.description || p['About the Product'] || p.sourceData?.aboutProduct || '',
+      mrp: Number(p.mrp || p.MRP || p.Price || 0) || 0,
+      product_info: {
+        ...(p.product_info || {}),
+        brand: p.product_info?.brand || p.Brand || p.sourceData?.raw?.Brand || '',
+      },
+      images: {
+        ...(p.images || {}),
+        image1: p.images?.image1 || p['Image Link'] || p.sourceData?.imageLink || '',
+      },
+      sourceData: {
+        ...(p.sourceData || {}),
+        skuName: p.sourceData?.skuName || p['SKU Name'] || p.title || '',
+        skuSize: p.sourceData?.skuSize || p['SKU Size'] || '',
+        aboutProduct: p.sourceData?.aboutProduct || p['About the Product'] || p.description || '',
+        imageLink: p.sourceData?.imageLink || p['Image Link'] || p.images?.image1 || '',
+      },
+    }));
+    return res.json(normalized);
   } catch (err) {
     return res.status(500).json({ message: 'Failed to list products', error: err.message });
   }
@@ -365,18 +387,76 @@ export async function adminUpdateAddress(req, res) {
 export async function updateProduct(req, res) {
   try {
     const { id } = req.params;
-    const { mrp, discountPercent } = req.body;
-
-    if (typeof mrp === 'undefined' && typeof discountPercent === 'undefined') {
-      return res.status(400).json({ message: 'At least one field (mrp or discountPercent) is required' });
+    const body = req.body || {};
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
+      return res.status(404).json({ message: 'Product not found' });
     }
 
     const updates = {};
-    if (typeof mrp !== 'undefined') {
-      updates.mrp = Number(mrp);
+    const title = body.title || body.skuName || body['SKU Name'];
+    const mrp = body.mrp ?? body.MRP ?? body.Price;
+    const description = body.description || body.aboutProduct || body['About the Product'];
+    const category = body.category || body.Category || body.mainCategory;
+    const subcategory = body.subcategory || body.subCategory || body['Sub-Category'];
+    const subSubCategory = body.subSubCategory || body['Sub-sub-Category'];
+    const imageLink = body.imageLink || body['Image Link'];
+    const brand = body.brand || body.Brand || body.product_info?.brand;
+
+    if (typeof title !== 'undefined') updates.title = title;
+    if (typeof mrp !== 'undefined') updates.mrp = parseCurrency(mrp);
+    if (typeof description !== 'undefined') updates.description = description;
+    if (typeof category !== 'undefined') updates.category = category;
+    if (typeof subcategory !== 'undefined') updates.subcategory = subcategory;
+    if (typeof subSubCategory !== 'undefined') updates.subSubCategory = subSubCategory;
+    if (typeof body.discountPercent !== 'undefined') {
+      updates.discountPercent = Number(body.discountPercent) || 0;
     }
-    if (typeof discountPercent !== 'undefined') {
-      updates.discountPercent = Number(discountPercent) || 0;
+    if (body.images || typeof imageLink !== 'undefined') {
+      const currentImages = existingProduct.images || {};
+      const nextImage1 = body.images?.image1 || imageLink || currentImages.image1 || '';
+      if (nextImage1) {
+        updates.images = {
+          image1: nextImage1,
+          image2: body.images?.image2 || currentImages.image2 || '',
+          image3: body.images?.image3 || currentImages.image3 || '',
+        };
+      }
+    }
+
+    updates.sourceData = {
+      ...(existingProduct.sourceData?.toObject ? existingProduct.sourceData.toObject() : existingProduct.sourceData || {}),
+      source: body.source || existingProduct.sourceData?.source || 'manual',
+      productLink: body.productLink || body['Product Link'] || existingProduct.sourceData?.productLink || '',
+      eanCode: body.eanCode || body['EAN Code'] || existingProduct.sourceData?.eanCode || '',
+      skuName: body.skuName || body['SKU Name'] || title || existingProduct.sourceData?.skuName || existingProduct.title || '',
+      skuSize: body.skuSize || body['SKU Size'] || existingProduct.sourceData?.skuSize || '',
+      imageLink: imageLink || body.images?.image1 || existingProduct.sourceData?.imageLink || existingProduct.images?.image1 || '',
+      aboutProduct: body.aboutProduct || body['About the Product'] || description || existingProduct.sourceData?.aboutProduct || existingProduct.description || '',
+      raw: body,
+    };
+
+    const nextMain = category || existingProduct.category || existingProduct.taxonomy?.mainCategory || '';
+    const nextSub = subcategory || existingProduct.subcategory || existingProduct.taxonomy?.subCategory || '';
+    const nextSubSub = subSubCategory || existingProduct.subSubCategory || existingProduct.taxonomy?.subSubCategory || '';
+    updates.taxonomy = {
+      mainCategory: nextMain,
+      mainCategorySlug: slugify(nextMain),
+      subCategory: nextSub,
+      subCategorySlug: slugify(nextSub),
+      subSubCategory: nextSubSub,
+      subSubCategorySlug: slugify(nextSubSub),
+    };
+
+    updates.product_info = {
+      ...(existingProduct.product_info?.toObject ? existingProduct.product_info.toObject() : existingProduct.product_info || {}),
+      ...(body.product_info || {}),
+      brand: brand || existingProduct.product_info?.brand || '',
+      manufacturer: body.product_info?.manufacturer || brand || existingProduct.product_info?.manufacturer || '',
+    };
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: 'No updatable fields provided' });
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -385,12 +465,9 @@ export async function updateProduct(req, res) {
       { new: true, runValidators: true }
     );
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
     return res.json(updatedProduct);
   } catch (err) {
+    console.error('[admin.updateProduct] Failed:', err);
     return res.status(500).json({ message: 'Failed to update product', error: err.message });
   }
 }

@@ -3,13 +3,21 @@ import { api } from '../../utils/api';
 import { FiEdit, FiTrash2, FiX, FiPlus, FiSearch, FiImage, FiPackage, FiDollarSign, FiTag, FiEye } from 'react-icons/fi';
 import ScrollToTop from '../../components/ScrollToTop';
 
+const ADMIN_IMAGE_FALLBACK =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='100%' height='100%' fill='%23f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='20'>No Image</text></svg>";
+
 const AdminProducts = () => {
   const [form, setForm] = useState({
     title: '',
+    skuName: '',
+    skuSize: '',
+    brand: '',
+    imageLink: '',
+    aboutProduct: '',
     mrp: '',
     discountPercent: 0,
     description: '',
-    category: '',
+    category: 'FMCG',
     images: { image1: '', image2: '', image3: '' },
     product_info: { 
       brand: '', 
@@ -42,6 +50,13 @@ const AdminProducts = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editForm, setEditForm] = useState({
     _id: '',
+    title: '',
+    skuName: '',
+    skuSize: '',
+    brand: '',
+    imageLink: '',
+    aboutProduct: '',
+    category: 'FMCG',
     mrp: '',
     discountPercent: 0,
     price: ''
@@ -79,14 +94,8 @@ const AdminProducts = () => {
       }
     } catch (e) {
       console.error('Failed to load categories:', e);
-      // Fallback to hardcoded categories if API fails
-      setAllCategories([
-        { name: 'Kids Clothing', slug: 'kids-clothing' },
-        { name: 'Kids Accessories', slug: 'kids-accessories' },
-        { name: 'Footwear', slug: 'footwear' },
-        { name: 'Baby Care', slug: 'baby-care' },
-        { name: 'Toys', slug: 'toys' },
-      ]);
+      // FMCG-only fallback
+      setAllCategories([{ name: 'FMCG', slug: 'fmcg' }]);
     }
   };
 
@@ -119,13 +128,26 @@ const AdminProducts = () => {
     setSaving(true);
     try {
       const payload = {
-        title: form.title,
+        title: form.title || form.skuName,
+        'SKU Name': form.skuName || form.title,
+        'SKU Size': form.skuSize,
+        Brand: form.brand,
+        'Image Link': form.imageLink || form.images?.image1 || '',
+        'About the Product': form.aboutProduct || form.description,
+        Category: form.category || 'FMCG',
         mrp: Number(form.mrp),
+        Price: Number(form.mrp),
         discountPercent: Number(form.discountPercent) || 0,
-        description: form.description,
-        category: form.category,
-        images: form.images,
-        product_info: form.product_info,
+        description: form.description || form.aboutProduct,
+        category: form.category || 'FMCG',
+        images: {
+          ...form.images,
+          image1: form.images?.image1 || form.imageLink || '',
+        },
+        product_info: {
+          ...form.product_info,
+          brand: form.brand || form.product_info?.brand || '',
+        },
       };
       await api.admin.createProduct(payload);
       setToast({ show: true, text: 'Product created successfully!', type: 'success' });
@@ -144,10 +166,15 @@ const AdminProducts = () => {
   const resetForm = () => {
     setForm({
       title: '',
+      skuName: '',
+      skuSize: '',
+      brand: '',
+      imageLink: '',
+      aboutProduct: '',
       mrp: '',
       discountPercent: 0,
       description: '',
-      category: '',
+      category: 'FMCG',
       images: { image1: '', image2: '', image3: '' },
       product_info: { 
         brand: '', 
@@ -191,8 +218,21 @@ const AdminProducts = () => {
 
   const openEditModal = (p) => {
     setEditingProduct(p);
+    const skuName = p?.sourceData?.skuName || p?.['SKU Name'] || p?.title || '';
+    const skuSize = p?.sourceData?.skuSize || p?.['SKU Size'] || '';
+    const brand = p?.product_info?.brand || p?.Brand || '';
+    const imageLink = p?.images?.image1 || p?.sourceData?.imageLink || p?.['Image Link'] || '';
+    const aboutProduct = p?.description || p?.sourceData?.aboutProduct || p?.['About the Product'] || '';
+    const category = p?.category || p?.Category || 'FMCG';
     setEditForm({
       _id: p._id,
+      title: p.title || skuName,
+      skuName,
+      skuSize,
+      brand,
+      imageLink,
+      aboutProduct,
+      category,
       mrp: p.mrp || '',
       discountPercent: p.discountPercent || 0,
       price: Math.round((p.mrp || 0) - ((p.mrp || 0) * (p.discountPercent || 0) / 100))
@@ -203,7 +243,7 @@ const AdminProducts = () => {
   const closeEditModal = () => {
     setIsEditModalOpen(false);
     setEditingProduct(null);
-    setEditForm({ _id: '', mrp: '', discountPercent: 0, price: '' });
+    setEditForm({ _id: '', title: '', skuName: '', skuSize: '', brand: '', imageLink: '', aboutProduct: '', category: 'FMCG', mrp: '', discountPercent: 0, price: '' });
   };
 
   const handleEditChange = (e) => {
@@ -224,8 +264,20 @@ const AdminProducts = () => {
     setError('');
     try {
       await api.admin.updateProduct(editForm._id, {
+        title: editForm.title || editForm.skuName,
+        'SKU Name': editForm.skuName || editForm.title,
+        'SKU Size': editForm.skuSize,
+        Brand: editForm.brand,
+        'Image Link': editForm.imageLink,
+        'About the Product': editForm.aboutProduct,
+        Category: editForm.category || 'FMCG',
         mrp: editForm.mrp,
-        discountPercent: editForm.discountPercent
+        Price: editForm.mrp,
+        discountPercent: editForm.discountPercent,
+        description: editForm.aboutProduct,
+        category: editForm.category || 'FMCG',
+        product_info: { brand: editForm.brand || '' },
+        images: { image1: editForm.imageLink || '' },
       });
       setToast({ show: true, text: 'Product updated successfully!', type: 'success' });
       closeEditModal();
@@ -274,7 +326,7 @@ const AdminProducts = () => {
   }, [filtered, page, pageSize]);
   useEffect(() => { setPage(1); }, [query, categoryFilter, pageSize]);
 
-  const filterCategories = ['all', 'kids-clothing', 'kids-accessories', 'footwear', 'baby-care', 'toys'];
+  const filterCategories = ['all', 'fmcg'];
   const categoryStats = useMemo(() => {
     const stats = {};
     filterCategories.forEach(cat => {
@@ -366,11 +418,7 @@ const AdminProducts = () => {
                   className="px-3 sm:px-4 py-2 text-sm sm:text-base border-2 border-gray-200 rounded-lg focus:border-pink-500 focus:outline-none"
                 >
                   <option value="all">All ({categoryStats.all})</option>
-                  <option value="kids-clothing">Kids Clothing ({categoryStats['kids-clothing']})</option>
-                  <option value="kids-accessories">Kids Accessories ({categoryStats['kids-accessories']})</option>
-                  <option value="footwear">Footwear ({categoryStats.footwear})</option>
-                  <option value="baby-care">Baby Care ({categoryStats['baby-care']})</option>
-                  <option value="toys">Toys ({categoryStats.toys})</option>
+                  <option value="fmcg">FMCG ({categoryStats.fmcg})</option>
                 </select>
                 <select
                   value={pageSize}
@@ -450,10 +498,10 @@ const AdminProducts = () => {
                         <td className="px-4 py-3">
                           <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200">
                             <img
-                              src={p?.images?.image1 || p?.image || 'https://via.placeholder.com/150'}
+                              src={p?.images?.image1 || p?.image || ADMIN_IMAGE_FALLBACK}
                               alt={p.title}
                               className="w-full h-full object-cover"
-                              onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                              onError={(e) => { e.target.onerror = null; e.target.src = ADMIN_IMAGE_FALLBACK; }}
                             />
                           </div>
                         </td>
@@ -555,10 +603,10 @@ const AdminProducts = () => {
                     <div className="flex gap-3 mb-3">
                       <div className="w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 flex-shrink-0">
                         <img
-                          src={p?.images?.image1 || p?.image || 'https://via.placeholder.com/150'}
+                          src={p?.images?.image1 || p?.image || ADMIN_IMAGE_FALLBACK}
                           alt={p.title}
                           className="w-full h-full object-cover"
-                          onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
+                          onError={(e) => { e.target.onerror = null; e.target.src = ADMIN_IMAGE_FALLBACK; }}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -664,51 +712,35 @@ const AdminProducts = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Product Title *</label>
-                    <input name="title" value={form.title} onChange={onChange} placeholder="Enter product title" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required />
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">SKU Name *</label>
+                    <input name="skuName" value={form.skuName} onChange={onChange} placeholder="Odonil Air Freshener" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required />
                   </div>
                   <div>
                     <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Category *</label>
                     <select name="category" value={form.category} onChange={onChange} className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required>
-                      <option value="">Select Category</option>
-                      {categories.length > 0 ? (
-                        // Render categories with subcategories grouped
-                        categories.map((parent) => (
-                          <optgroup key={parent._id || parent.slug} label={parent.name}>
-                            <option value={parent.slug || parent.name.toLowerCase().replace(/\s+/g, '-')}>
-                              {parent.name}
-                            </option>
-                            {parent.subcategories && parent.subcategories.length > 0 && parent.subcategories.map((sub) => (
-                              <option key={sub._id || sub.slug} value={sub.slug || sub.name.toLowerCase().replace(/\s+/g, '-')}>
-                                {parent.name} - {sub.name}
-                              </option>
-                            ))}
-                          </optgroup>
-                        ))
-                      ) : allCategories.length > 0 ? (
-                        // Fallback: render all categories flat
-                        allCategories.map((cat) => (
-                          <option key={cat._id || cat.slug} value={cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')}>
-                            {cat.name}
-                          </option>
-                        ))
-                      ) : (
-                        // Default fallback
-                        <>
-                          <option value="kids-clothing">Kids Clothing</option>
-                          <option value="kids-accessories">Kids Accessories</option>
-                          <option value="footwear">Footwear</option>
-                          <option value="baby-care">Baby Care</option>
-                          <option value="toys">Toys</option>
-                        </>
-                      )}
+                      <option value="FMCG">FMCG</option>
                     </select>
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">SKU Size</label>
+                    <input name="skuSize" value={form.skuSize} onChange={onChange} placeholder="150 ML" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Brand</label>
+                    <input name="brand" value={form.brand} onChange={onChange} placeholder="Odonil" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Image Link *</label>
+                    <input name="imageLink" value={form.imageLink} onChange={onChange} placeholder="https://..." className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Description</label>
-                  <textarea name="description" value={form.description} onChange={onChange} placeholder="Enter product description" rows="3" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none resize-none" />
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">About the Product</label>
+                  <textarea name="aboutProduct" value={form.aboutProduct} onChange={onChange} placeholder="About the product..." rows="3" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none resize-none" />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -733,7 +765,7 @@ const AdminProducts = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Image 1 (Required) *</label>
-                      <input value={form.images.image1} onChange={onChangeNested('images', 'image1')} placeholder="Image URL" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required />
+                      <input value={form.images.image1 || form.imageLink} onChange={onChangeNested('images', 'image1')} placeholder="Image URL" className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-pink-500 focus:outline-none" required />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Image 2</label>
@@ -804,9 +836,9 @@ const AdminProducts = () => {
 
         {/* Edit Product Modal */}
         {isEditModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-            <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-md shadow-2xl my-2 sm:my-4">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center rounded-t-xl sm:rounded-t-2xl">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+            <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-3xl shadow-2xl my-2 sm:my-4 max-h-[95vh] overflow-y-auto">
+              <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center rounded-t-xl sm:rounded-t-2xl z-10">
                 <h3 className="text-lg sm:text-xl font-bold text-white">Edit Product</h3>
                 <button onClick={closeEditModal} className="text-white hover:text-gray-200 flex-shrink-0">
                   <FiX className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -815,35 +847,84 @@ const AdminProducts = () => {
               
               <form onSubmit={handleUpdateProduct} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                 {error && <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 text-red-700 text-sm">{error}</div>}
-                
-                <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">MRP (₹)</label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Category</label>
+                    <select
+                      name="category"
+                      value={editForm.category}
+                      onChange={handleEditChange}
+                      className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                    >
+                      <option value="FMCG">FMCG</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Brand</label>
+                    <input
+                      type="text"
+                      name="brand"
+                      value={editForm.brand}
+                      onChange={handleEditChange}
+                      className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">SKU Name *</label>
                   <input
-                    type="number"
-                    name="mrp"
-                    value={editForm.mrp}
+                    type="text"
+                    name="skuName"
+                    value={editForm.skuName}
                     onChange={handleEditChange}
                     className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
                     required
-                    min="1"
-                    step="0.01"
                   />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">SKU Size</label>
+                    <input
+                      type="text"
+                      name="skuSize"
+                      value={editForm.skuSize}
+                      onChange={handleEditChange}
+                      className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
-                
-                <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Discount (%)</label>
-                  <input
-                    type="number"
-                    name="discountPercent"
-                    value={editForm.discountPercent}
-                    onChange={handleEditChange}
-                    className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
-                    min="0"
-                    max="100"
-                    step="1"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">MRP (₹)</label>
+                    <input
+                      type="number"
+                      name="mrp"
+                      value={editForm.mrp}
+                      onChange={handleEditChange}
+                      className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                      required
+                      min="1"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Discount (%)</label>
+                    <input
+                      type="number"
+                      name="discountPercent"
+                      value={editForm.discountPercent}
+                      onChange={handleEditChange}
+                      className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                      min="0"
+                      max="100"
+                      step="1"
+                    />
+                  </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-3 sm:p-4 rounded-lg border-2 border-indigo-200">
                   <div className="text-xs sm:text-sm text-gray-600 mb-1">Selling Price:</div>
                   <div className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -853,8 +934,42 @@ const AdminProducts = () => {
                     (MRP - {editForm.discountPercent}% discount)
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Image Link</label>
+                  <input
+                    type="text"
+                    name="imageLink"
+                    value={editForm.imageLink}
+                    onChange={handleEditChange}
+                    className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none"
+                  />
+                  {editForm.imageLink ? (
+                    <div className="mt-2 w-24 h-24 rounded-lg border border-gray-200 overflow-hidden bg-gray-50">
+                      <img
+                        src={editForm.imageLink}
+                        alt={editForm.skuName || 'Product'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+
+                <div>
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">About the Product</label>
+                  <textarea
+                    name="aboutProduct"
+                    value={editForm.aboutProduct}
+                    onChange={handleEditChange}
+                    rows="3"
+                    className="w-full text-sm sm:text-base border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 focus:border-indigo-500 focus:outline-none resize-none"
+                  />
+                </div>
                 
-                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+                <div className="sticky bottom-0 bg-white pt-3 border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={closeEditModal}
@@ -891,10 +1006,10 @@ const AdminProducts = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <img
-                      src={viewingProduct?.images?.image1 || viewingProduct?.image || 'https://via.placeholder.com/400'}
+                      src={viewingProduct?.images?.image1 || viewingProduct?.image || ADMIN_IMAGE_FALLBACK}
                       alt={viewingProduct.title}
                       className="w-full h-48 sm:h-64 object-contain rounded-lg border-2 border-gray-200"
-                      onError={(e) => { e.target.src = 'https://via.placeholder.com/400'; }}
+                      onError={(e) => { e.target.onerror = null; e.target.src = ADMIN_IMAGE_FALLBACK; }}
                     />
                   </div>
                   <div>
