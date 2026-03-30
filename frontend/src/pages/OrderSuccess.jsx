@@ -106,45 +106,45 @@ const OrderSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-6">
       <div 
-        className={`w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md border border-gray-200 p-6 sm:p-8 transition-all duration-500 ${
+        className={`w-full max-w-2xl mx-auto bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6 transition-all duration-500 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
       >
         
         {/* Header Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           {/* Countdown Timer */}
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end mb-3">
             <div className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-1.5 flex items-center gap-2 animate-fadeIn">
               <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></div>
-              <p className="text-sm text-black font-medium">
+              <p className="text-xs sm:text-sm text-black font-medium">
                 Redirecting in <span className="font-bold text-pink-500 animate-countdown">{countdown}</span>s
               </p>
             </div>
           </div>
 
           {/* Success Icon */}
-          <div className="flex justify-center mb-4">
-            <div className={`w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center transition-all duration-700 ${
+          <div className="flex justify-center mb-3">
+            <div className={`w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center transition-all duration-700 ${
               isVisible ? 'scale-100 animate-bounce-once' : 'scale-0'
             }`}>
-              <CheckCircle className={`w-12 h-12 text-pink-500 transition-all duration-500 ${
+              <CheckCircle className={`w-10 h-10 text-pink-500 transition-all duration-500 ${
                 isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`} style={{ animationDelay: '0.2s' }} />
             </div>
           </div>
 
           {/* Success Message */}
-          <h1 className={`text-3xl font-bold text-black mb-3 transition-all duration-500 ${
+          <h1 className={`text-2xl sm:text-3xl font-bold text-black mb-2 transition-all duration-500 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`} style={{ animationDelay: '0.3s' }}>
             Order Placed Successfully! 🎉
           </h1>
           
           {/* Order Number */}
-          <div className={`inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg border border-gray-200 mb-4 transition-all duration-500 ${
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg border border-gray-200 mb-3 transition-all duration-500 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`} style={{ animationDelay: '0.4s' }}>
             <Receipt className="w-4 h-4 text-black" />
@@ -152,7 +152,7 @@ const OrderSuccess = () => {
             <span className="text-sm font-bold text-black">#{orderNumber}</span>
           </div>
           
-          <p className={`text-base text-black transition-all duration-500 ${
+          <p className={`text-sm sm:text-base text-black transition-all duration-500 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`} style={{ animationDelay: '0.5s' }}>
             Your order has been confirmed and will be processed shortly.
@@ -160,16 +160,16 @@ const OrderSuccess = () => {
         </div>
 
         {/* Order Details Grid */}
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 transition-all duration-500 ${
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 mb-5 transition-all duration-500 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`} style={{ animationDelay: '0.6s' }}>
           {/* Estimated Delivery */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
+          <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-all duration-300 hover:scale-105">
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="w-5 h-5 text-black" />
               <span className="text-sm font-semibold text-black">Estimated Delivery</span>
             </div>
-            <p className="text-lg font-semibold text-black mb-1">
+            <p className="text-base sm:text-lg font-semibold text-black mb-1">
               {estimatedDelivery.toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 month: 'short', 
@@ -180,12 +180,12 @@ const OrderSuccess = () => {
           </div>
           
           {/* Payment Method */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
+          <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-all duration-300 hover:scale-105">
             <div className="flex items-center gap-2 mb-2">
               <Package className="w-5 h-5 text-black" />
               <span className="text-sm font-semibold text-black">Payment Method</span>
             </div>
-            <p className="text-lg font-semibold text-black mb-1">
+            <p className="text-base sm:text-lg font-semibold text-black mb-1">
               {paymentMethod === 'COD' ? 'Cash on Delivery' : 'Online Payment'}
             </p>
             {paymentMethod === 'COD' && (
@@ -196,7 +196,7 @@ const OrderSuccess = () => {
 
         {/* Order Summary */}
         {orderTotal > 0 && (
-          <div className={`bg-white border border-gray-200 rounded-lg p-4 mb-6 transition-all duration-500 ${
+          <div className={`bg-white border border-gray-200 rounded-lg p-3 mb-5 transition-all duration-500 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`} style={{ animationDelay: '0.7s' }}>
             <div className="flex items-center gap-2 mb-3">
@@ -206,7 +206,7 @@ const OrderSuccess = () => {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
                 <span className="text-black">Order Total</span>
-                <span className="font-bold text-lg text-black">₹{orderTotal.toLocaleString()}</span>
+                <span className="font-bold text-base sm:text-lg text-black">₹{orderTotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-black">Payment Method</span>
@@ -221,26 +221,26 @@ const OrderSuccess = () => {
         )}
 
         {/* Action Buttons */}
-        <div className={`space-y-3 transition-all duration-500 ${
+        <div className={`space-y-2.5 transition-all duration-500 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`} style={{ animationDelay: '0.8s' }}>
           <button
             onClick={() => setShowInvoice(true)}
-            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
           >
             <FileText className="w-5 h-5" />
             <span>View Invoice</span>
           </button>
           <button
             onClick={handleGoToOrders}
-            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
           >
             <Package className="w-5 h-5" />
             <span>View My Orders</span>
           </button>
           <button
             onClick={handleContinueShopping}
-            className="w-full bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-black py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+            className="w-full bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 text-black py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
           >
             Continue Shopping
           </button>

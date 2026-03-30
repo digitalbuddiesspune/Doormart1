@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { getMyAddress, saveMyAddress, deleteAddressById, updateAddressById, createPaymentOrder, verifyPayment, createCodOrder } from '../services/api';
+import { getMyAddress, saveMyAddress, deleteAddressById, updateAddressById, createCodOrder } from '../services/api';
 import ScrollToTop from '../components/ScrollToTop';
 
 const indianStates = [
@@ -69,7 +69,6 @@ export default function AddressForm() {
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showForm, setShowForm] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState('online'); // 'online' or 'cod'
   const { cart, cartTotal: total, loadCart } = useCart();
 
   // Calculate price details
@@ -100,97 +99,21 @@ export default function AddressForm() {
       alert('Please save your delivery address first.');
       return;
     }
-    
-    // Handle Cash on Delivery
-    if (paymentMethod === 'cod') {
-      try {
-        const result = await createCodOrder();
-        if (result && result.success) {
-          // Store order total before clearing cart
-          localStorage.setItem('lastOrderTotal', priceDetails.total.toString());
-          await loadCart();
-          // Redirect to order success page
-          const orderId = result.order?._id || result.order?.id || '';
-          navigate(`/order-success?method=COD&orderId=${orderId}`);
-        } else {
-          const errorMsg = result?.error || 'Failed to place COD order. Please try again.';
-          alert(errorMsg);
-        }
-      } catch (e) {
-        console.error('COD order error:', e);
-        const errorMsg = e?.message || e?.response?.error || 'Failed to place COD order. Please try again.';
+    try {
+      const result = await createCodOrder();
+      if (result && result.success) {
+        localStorage.setItem('lastOrderTotal', priceDetails.total.toString());
+        await loadCart();
+        const orderId = result.order?._id || result.order?.id || '';
+        navigate(`/order-success?method=COD&orderId=${orderId}`);
+      } else {
+        const errorMsg = result?.error || 'Failed to place COD order. Please try again.';
         alert(errorMsg);
       }
-      return;
-    }
-    
-    // Handle Online Payment
-    try {
-      if (!window.Razorpay) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-          s.onload = resolve;
-          s.onerror = reject;
-          document.body.appendChild(s);
-        });
-      }
-      const amount = priceDetails.total;
-      const { order, key } = await createPaymentOrder(amount, {
-        name: formData.name,
-        mobile: formData.mobile,
-        city: formData.city,
-      });
-      const options = {
-        key,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'DoorMart',
-        description: 'Order Payment',
-        order_id: order.id,
-        prefill: { name: formData.name || '', contact: formData.mobile || '' },
-        theme: { color: '#5c9404' },
-        handler: async function (response) {
-          try {
-            console.log('[Razorpay] Payment response received:', response);
-            
-            // Ensure we send the correct field names
-            const paymentData = {
-              razorpay_order_id: response.razorpay_order_id || response.razorpayOrderId,
-              razorpay_payment_id: response.razorpay_payment_id || response.razorpayPaymentId,
-              razorpay_signature: response.razorpay_signature || response.razorpaySignature,
-            };
-            
-            console.log('[Razorpay] Sending to backend:', paymentData);
-            
-            const r = await verifyPayment(paymentData);
-            if (r && r.success) {
-              // Store order total before clearing cart
-              localStorage.setItem('lastOrderTotal', amount.toString());
-              await loadCart();
-              // Redirect to order success page
-              const orderId = r.order?._id || r.order?.id || '';
-              navigate(`/order-success?method=online&orderId=${orderId}`);
-            } else {
-              const errorMsg = r?.error || 'Payment verification failed';
-              alert(errorMsg);
-            }
-          } catch (e) {
-            console.error('[Razorpay] Payment verification error:', e);
-            console.error('[Razorpay] Error details:', {
-              message: e?.message,
-              response: e?.response,
-              stack: e?.stack,
-            });
-            const errorMsg = e?.message || e?.response?.error || 'Payment verification failed. Please contact support if amount was deducted.';
-            alert(errorMsg);
-          }
-        },
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
     } catch (e) {
-      alert('Unable to start payment');
+      console.error('COD order error:', e);
+      const errorMsg = e?.message || e?.response?.error || 'Failed to place COD order. Please try again.';
+      alert(errorMsg);
     }
   };
 
@@ -999,41 +922,15 @@ export default function AddressForm() {
             {/* Payment Method Selection */}
             {hasSavedAddress && (
               <div className="mb-3 sm:mb-4 pb-3 sm:pb-4 border-b-2 border-gray-200">
-                <h4 className="text-black font-semibold mb-2 sm:mb-3 text-xs sm:text-sm">Select Payment Method</h4>
+                <h4 className="text-black font-semibold mb-2 sm:mb-3 text-xs sm:text-sm">Payment Method</h4>
                 <div className="space-y-2">
-                  <label className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                    paymentMethod === 'online' 
-                      ? 'border-pink-500 bg-white' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="online"
-                      checked={paymentMethod === 'online'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-4 h-4 text-pink-500 focus:ring-pink-500 flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-xs sm:text-sm text-black">Online Payment</div>
-                      <div className="text-xs text-black">Pay securely with Razorpay</div>
-                    </div>
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                  </label>
-                  
-                  <label className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                    paymentMethod === 'cod' 
-                      ? 'border-pink-500 bg-white' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}>
+                  <label className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border-2 border-pink-500 bg-white">
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="cod"
-                      checked={paymentMethod === 'cod'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      checked
+                      readOnly
                       className="w-4 h-4 text-pink-500 focus:ring-pink-500 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
@@ -1057,7 +954,7 @@ export default function AddressForm() {
                   : 'bg-gray-300 text-gray-600 cursor-not-allowed'
               }`}
             >
-              {paymentMethod === 'cod' ? 'PLACE ORDER (COD)' : 'PROCEED TO PAYMENT'}
+              PLACE ORDER (COD)
             </button>
           </div>
         </div>
